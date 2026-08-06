@@ -8,8 +8,17 @@ figure, and can print/export the result.
 
 > **The rubric itself is an unvalidated draft.** This tool performs the
 > arithmetic the document defines — it does not validate, endorse, or
-> calibrate the instrument. See "Status" in the source rubric and Part E
-> (validation plan) before using scores for staffing or budget decisions.
+> calibrate the instrument. See "Status" in the source rubric and the
+> [validation plan](docs/rubric.md#6-validation-plan) before using scores for
+> staffing or budget decisions.
+
+**Live tool:** https://jhodges38104.github.io/hem-protocol-scoring-tool/
+
+## Guides
+
+- **[docs/quick-guide.md](docs/quick-guide.md)** — score a protocol in about ten minutes.
+- **[docs/user-guide.md](docs/user-guide.md)** — governance, the two-scorer reconciliation workflow, how to interpret a result (tier, WU, FTE) without overreaching, FAQ, glossary.
+- **[docs/rubric.md](docs/rubric.md)** — the full rubric write-up: every domain/item table, the Part B formula, the validation plan, and a references list (verified citations for OPAL, IWAT, and the reliability-statistics literature the validation plan calls for).
 
 ## Using it
 
@@ -24,15 +33,16 @@ you type; nothing is transmitted anywhere. From the **Export** section you can:
   fields), for pooling exports from multiple scorers per Part D/C of the
   rubric (inter-rater reliability tracking).
 
-## Deploying on GitHub Pages
+## GitHub Pages
 
-1. Push this repository to GitHub.
-2. Repo Settings → Pages → Deploy from a branch → select `main` and `/ (root)`.
-3. The page will be live at `https://<org-or-user>.github.io/<repo>/`.
+Already deployed from this repo: `main` branch, `/ (root)`, at
+https://jhodges38104.github.io/hem-protocol-scoring-tool/ — Settings → Pages
+in the repo shows the same config. To change the source branch/path, or to
+redeploy after edits, just push to `main`; Pages rebuilds automatically.
 
-No secrets, backend, or build step are involved, so any repo visibility works;
-see the note on private-repo Pages requiring GitHub Enterprise Cloud if that
-matters for your org.
+This repo is **public**, which is a requirement, not a preference: GitHub
+Pages on a *private* repo needs GitHub Enterprise Cloud. Switching this repo
+to private would take the live site down unless that tier is available.
 
 ## Interpretive decisions baked into the arithmetic
 
@@ -66,6 +76,8 @@ tool made an explicit choice rather than guessing silently:
 - `app.js` — rubric data (domains/items/weights), scoring logic, rendering,
   export/import, autosave.
 - `styles.css` — layout, light/dark theme, and the print stylesheet.
+- `docs/rubric.md`, `docs/quick-guide.md`, `docs/user-guide.md` — the written
+  guides linked above.
 
 No framework, bundler, or external network calls — deliberately, so this runs
 unmodified on a hospital network and stays auditable by reading three files.

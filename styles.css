@@ -217,6 +217,7 @@ input[type="number"] { font-variant-numeric: tabular-nums; }
 
 .app-footer { padding: 8px 4px 0; }
 .app-footer p { color: var(--ink-muted); font-size: 0.8rem; }
+.app-footer a { color: var(--ink-secondary); }
 
 /* ── Print ───────────────────────────────────────────────────────────── */
 @media print {
