@@ -4,7 +4,7 @@ This page is the canonical, citable write-up of the scoring rules the [tool](../
 
 > **Status: unvalidated draft (v0.1).** This is a reasoned starting point, not an empirically derived instrument. Section 6 (Validation plan) below specifies the calibration work required before scores drive any staffing or budget decision. Nothing on this page should be read as having cleared that bar yet.
 
-Source: internal HEM CTM draft, *Non-Malignant Hematology Protocol Complexity & Workload Rubric (Draft v0.1)*. This write-up reorganizes and lightly expands that draft for readability and adds the [References](#references) section; it does not change any weight, range, or formula.
+Source: internal HEM CTM draft, [*Non-Malignant Hematology Protocol Complexity & Workload Rubric (Draft v0.1)*](TrialComplexityRubric.pdf) — the original PDF is included alongside this file. This write-up reorganizes and lightly expands that draft for readability and adds the [References](#references) section; it does not change any weight, range, or formula.
 
 ## Contents
 

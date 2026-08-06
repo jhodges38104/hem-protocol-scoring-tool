@@ -18,7 +18,7 @@ figure, and can print/export the result.
 
 - **[docs/quick-guide.md](docs/quick-guide.md)** — score a protocol in about ten minutes.
 - **[docs/user-guide.md](docs/user-guide.md)** — governance, the two-scorer reconciliation workflow, how to interpret a result (tier, WU, FTE) without overreaching, FAQ, glossary.
-- **[docs/rubric.md](docs/rubric.md)** — the full rubric write-up: every domain/item table, the Part B formula, the validation plan, and a references list (verified citations for OPAL, IWAT, and the reliability-statistics literature the validation plan calls for).
+- **[docs/rubric.md](docs/rubric.md)** — the full rubric write-up: every domain/item table, the Part B formula, the validation plan, and a references list (verified citations for OPAL, IWAT, and the reliability-statistics literature the validation plan calls for). The original [`docs/TrialComplexityRubric.pdf`](docs/TrialComplexityRubric.pdf) is included alongside it.
 
 ## Using it
 
