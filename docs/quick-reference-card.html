@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>HEM Protocol Complexity &amp; Workload — Quick Reference Card</title>
+<style>
+
+* { box-sizing: border-box; }
+body { margin: 0; font-family: Arial, Helvetica, sans-serif; color: #111; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.page { padding: 0.22in 0.32in 0.15in; }
+h1 { font-size: 14.5pt; margin: 0 0 1px; }
+.subtitle { font-size: 7.8pt; color: #444; margin: 0 0 3px; }
+.disclaimer { background: #fff6e0; border-left: 4px solid #d98c00; border-radius: 3px; padding: 3px 8px; font-size: 7.1pt; margin-bottom: 4px; line-height: 1.2; }
+.disclaimer strong { color: #7a4b00; }
+
+table { border-collapse: collapse; width: 100%; table-layout: fixed; }
+.domtable { font-size: 7pt; margin-bottom: 3px; }
+.domtable th { text-align: left; background: #eee; border-bottom: 1px solid #999; padding: 1.6px 4px; font-size: 6.8pt; }
+.domtable td { padding: 1.3px 4px; border-bottom: 0.5px solid #ddd; vertical-align: top; }
+.domtable .itemno { width: 24px; color: #666; white-space: nowrap; }
+.domtable .itemlabel { width: 20%; font-weight: 600; }
+.domtable .range { width: 42px; color: #333; white-space: nowrap; text-align: center; font-variant-numeric: tabular-nums; }
+.domtable .anchors { color: #222; }
+.domtable .nonote { color: #bbb; }
+tr.domainhead td { padding: 2.4px 4px 1.6px; border-bottom: none; border-top: 1.5px solid #ccc; }
+tr.domainhead { border-left: 6px solid; }
+tr.domainhead strong { font-size: 7.6pt; }
+.domainbar { display: none; }
+.domainrange, .capnote { font-weight: 400; color: #555; font-size: 6.8pt; }
+
+.boxrow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; align-items: start; margin-bottom: 9px; }
+.boxrow.row1 { grid-template-columns: repeat(4, 1fr); }
+.boxrow.row2 { grid-template-columns: 1.1fr 1.6fr 1fr; }
+.box { border: 1px solid #bbb; border-radius: 4px; padding: 6px 9px 7px; font-size: 8.3pt; min-width: 0; }
+.boxtitle { font-weight: 700; font-size: 9pt; margin-bottom: 3px; border-bottom: 1px solid #ccc; padding-bottom: 2px; }
+.box ul, .box ol { margin: 3px 0 0; padding-left: 14px; }
+.box li { margin-bottom: 3px; }
+
+.tiertable, .summarytable, .wutable { font-size: 8.2pt; }
+.tiertable th, .summarytable th, .wutable th { background: #eee; text-align: left; padding: 2px 4px; border-bottom: 1px solid #999; }
+.tiertable td, .summarytable td, .wutable td { padding: 2px 4px; border-bottom: 0.5px solid #ddd; font-variant-numeric: tabular-nums; }
+.tiertable .tiernum { font-weight: 700; }
+.summarytable .totalrow td { font-weight: 700; border-top: 1px solid #999; border-bottom: none; }
+.swatch { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 4px; vertical-align: middle; }
+.participanttable { table-layout: fixed; }
+.participanttable th, .participanttable td { text-align: center; padding: 2px 2px; }
+.participanttable .statuslabel { text-align: left; width: 42%; line-height: 1.15; }
+
+.formula { font-size: 8.6pt; text-align: center; padding: 4px 2px 2px; font-weight: 600; line-height: 1.5; }
+
+.pagefooter { display: flex; justify-content: space-between; font-size: 6.4pt; color: #666; margin-top: 2px; border-top: 1px solid #ccc; padding-top: 1.5px; }
+
+@page { size: letter landscape; margin: 0.25in; }
+.pagebreak { page-break-after: always; break-after: page; }
+</style>
+</head>
+<body>
+<div class="page pagebreak">
+  <h1>Non-Malignant Hematology Protocol Complexity &amp; Workload — Quick Reference Card</h1>
+  <p class="subtitle">7 Domains · 32 Criteria · Score 0–max per item, whole numbers, interpolate to anchors · Rubric Draft v0.1 · page 1 of 2 — scoring criteria</p>
+  <div class="disclaimer"><strong>⚠ Unvalidated draft instrument (Draft v0.1).</strong> Weights are reasoned starting points, not empirically derived. Do not use scores alone to justify staffing or budget decisions until the Part E calibration (content validity, inter-rater reliability, capacity-constant time study) is complete.</div>
+  <table class="domtable"><thead><tr><th class="itemno">#</th><th class="itemlabel">Criterion</th><th class="range">Range</th><th class="anchors">Anchors — interpolate between 0 (low) and Max (high)</th></tr></thead><tbody>
+<tr class="domainhead" style="border-left-color:#2a78d6"><td colspan="4"><span class="domainbar" style="background:#2a78d6"></span><strong>Domain 1 — Regulatory &amp; Sponsorship Framework</strong> <span class="domainrange">(0–18)</span></td></tr><tr><td class="itemno">1.1</td><td class="itemlabel">Regulatory status</td><td class="range">0–5</td><td class="anchors">0 = Not FDA-regulated · Mid = IND/IDE exempt determination required · Max = Active IND/IDE held by St. Jude</td></tr>
+<tr><td class="itemno">1.2</td><td class="itemlabel">Sponsor type</td><td class="range">0–3</td><td class="anchors">0 = Investigator-initiated, internal · Mid = NIH/federal · Max = Industry, or federal with external coordinating center</td></tr>
+<tr><td class="itemno">1.3</td><td class="itemlabel">Site role</td><td class="range">0–5</td><td class="anchors">0 = Single-site · Mid = Participating site, multi-site · Max = Coordinating center for multi-site</td></tr>
+<tr><td class="itemno">1.4</td><td class="itemlabel">Oversight bodies</td><td class="range">0–3</td><td class="anchors">0 = IRB only · Mid = + DSMB or independent monitor · Max = + external audit/inspection readiness obligations</td></tr>
+<tr><td class="itemno">1.5</td><td class="itemlabel">IRB model</td><td class="range">0–2</td><td class="anchors">0 = Local IRB only · Mid = sIRB relying · Max = sIRB reviewing for external sites</td></tr>
+<tr class="domainhead" style="border-left-color:#eb6834"><td colspan="4"><span class="domainbar" style="background:#eb6834"></span><strong>Domain 2 — Population &amp; Consent</strong> <span class="domainrange">(0–12)</span></td></tr><tr><td class="itemno">2.1</td><td class="itemlabel">Pediatric enrollment with assent tiers</td><td class="range">0–3</td><td class="anchors">0 = adults only; 3 = multiple assent age bands with reconsent at transition</td></tr>
+<tr><td class="itemno">2.2</td><td class="itemlabel">Vulnerable/protected populations</td><td class="range">0–3</td><td class="anchors">decisionally impaired, wards, pregnant participants</td></tr>
+<tr><td class="itemno">2.3</td><td class="itemlabel">Re-consent burden</td><td class="range">0–3</td><td class="anchors">anticipated amendments requiring re-consent of active cohort</td></tr>
+<tr><td class="itemno">2.4</td><td class="itemlabel">Language/literacy accommodation</td><td class="range">0–3</td><td class="anchors">translated materials, interpreter-dependent visits</td></tr>
+<tr class="domainhead" style="border-left-color:#1baf7a"><td colspan="4"><span class="domainbar" style="background:#1baf7a"></span><strong>Domain 3 — Visit &amp; Procedure Burden</strong> <span class="domainrange">(0–18)</span></td></tr><tr><td class="itemno">3.1</td><td class="itemlabel">Protocol-required visits per participant-year</td><td class="range">0–5</td><td class="anchors">0 = ≤1; 5 = &gt;12</td></tr>
+<tr><td class="itemno">3.2</td><td class="itemlabel">Procedure intensity</td><td class="range">0–5</td><td class="anchors">0 = none/records only; 5 = apheresis, conditioning/HSCT, sedated imaging</td></tr>
+<tr><td class="itemno">3.3</td><td class="itemlabel">Timed/PK or serial sampling</td><td class="range">0–3</td><td class="anchors">any window &lt;30 min counts as max</td></tr>
+<tr><td class="itemno">3.4</td><td class="itemlabel">Visit window rigidity</td><td class="range">0–2</td><td class="anchors">±14 d vs ±2 d</td></tr>
+<tr><td class="itemno">3.5</td><td class="itemlabel">Off-site, home, or remote assessment</td><td class="range">0–3</td><td class="anchors">includes wearables and home phlebotomy logistics</td></tr>
+<tr class="domainhead" style="border-left-color:#eda100"><td colspan="4"><span class="domainbar" style="background:#eda100"></span><strong>Domain 4 — Investigational Product / Intervention</strong> <span class="domainrange">(0–12)</span></td></tr><tr><td class="itemno">4.1</td><td class="itemlabel">IP handling &amp; accountability</td><td class="range">0–4</td><td class="anchors">0 = no IP; 4 = cell/gene product with chain-of-custody</td></tr>
+<tr><td class="itemno">4.2</td><td class="itemlabel">Blinding &amp; randomization</td><td class="range">0–3</td><td class="anchors">0 = open-label/none; 3 = double-blind with unblinding procedures</td></tr>
+<tr><td class="itemno">4.3</td><td class="itemlabel">Pharmacy/manufacturing interface</td><td class="range">0–3</td><td class="anchors">0 = none; 3 = on-site manufacturing or apheresis-to-product workflow</td></tr>
+<tr><td class="itemno">4.4</td><td class="itemlabel">Dose modification complexity</td><td class="range">0–2</td><td class="anchors">rules requiring per-visit adjudication</td></tr>
+<tr class="domainhead" style="border-left-color:#e87ba4"><td colspan="4"><span class="domainbar" style="background:#e87ba4"></span><strong>Domain 5 — Data &amp; Specimen Management</strong> <span class="domainrange">(0–16)</span> <span class="capnote">(itemized 18 → capped at 16)</span></td></tr><tr><td class="itemno">5.1</td><td class="itemlabel">eCRF volume</td><td class="range">0–4</td><td class="anchors">fields per participant-visit</td></tr>
+<tr><td class="itemno">5.2</td><td class="itemlabel">Number of distinct data systems</td><td class="range">0–4</td><td class="anchors">sponsor EDC + REDCap + registry + imaging portal each count</td></tr>
+<tr><td class="itemno">5.3</td><td class="itemlabel">Biospecimen processing/shipping</td><td class="range">0–3</td><td class="anchors">0 = none; 3 = time-critical processing with international shipment</td></tr>
+<tr><td class="itemno">5.4</td><td class="itemlabel">Central/core lab or imaging read</td><td class="range">0–2</td><td class="anchors"><span class="nonote">—</span></td></tr>
+<tr><td class="itemno">5.5</td><td class="itemlabel">PRO/ePRO administration</td><td class="range">0–2</td><td class="anchors"><span class="nonote">—</span></td></tr>
+<tr><td class="itemno">5.6</td><td class="itemlabel">Linked or derived data (geospatial, EHR extract, genomic)</td><td class="range">0–3</td><td class="anchors">includes SDOH/neighborhood-level linkage</td></tr>
+<tr class="domainhead" style="border-left-color:#008300"><td colspan="4"><span class="domainbar" style="background:#008300"></span><strong>Domain 6 — Safety Reporting &amp; Monitoring</strong> <span class="domainrange">(0–12)</span></td></tr><tr><td class="itemno">6.1</td><td class="itemlabel">Expected AE/SAE volume</td><td class="range">0–4</td><td class="anchors"><span class="nonote">—</span></td></tr>
+<tr><td class="itemno">6.2</td><td class="itemlabel">Expedited reporting obligations</td><td class="range">0–3</td><td class="anchors">multi-recipient (FDA, sponsor, sIRB, DSMB) = max</td></tr>
+<tr><td class="itemno">6.3</td><td class="itemlabel">Monitoring visit frequency</td><td class="range">0–3</td><td class="anchors"><span class="nonote">—</span></td></tr>
+<tr><td class="itemno">6.4</td><td class="itemlabel">Long-term follow-up horizon</td><td class="range">0–2</td><td class="anchors">0 = ≤2 yr; 2 = ≥5 yr (gene therapy LTFU obligations)</td></tr>
+<tr class="domainhead" style="border-left-color:#4a3aa7"><td colspan="4"><span class="domainbar" style="background:#4a3aa7"></span><strong>Domain 7 — Qualitative, Mixed-Method &amp; Community Engagement</strong> <span class="domainrange">(0–12)</span></td></tr><tr><td class="itemno">7.1</td><td class="itemlabel">Interview/focus group data collection</td><td class="range">0–4</td><td class="anchors">count × duration; includes scheduling burden</td></tr>
+<tr><td class="itemno">7.2</td><td class="itemlabel">Transcription, coding &amp; analysis load</td><td class="range">0–4</td><td class="anchors">multi-coder with reliability requirements = max</td></tr>
+<tr><td class="itemno">7.3</td><td class="itemlabel">Community advisory board or partner site coordination</td><td class="range">0–2</td><td class="anchors"><span class="nonote">—</span></td></tr>
+<tr><td class="itemno">7.4</td><td class="itemlabel">Dissemination obligations beyond manuscript</td><td class="range">0–2</td><td class="anchors">community reports, policy briefs, stakeholder convenings</td></tr>
+</tbody></table>
+  <div class="pagefooter">
+    <span>Non-Malignant Hematology Protocol Complexity &amp; Workload Rubric, Draft v0.1 — unvalidated draft</span>
+    <span>See page 2 for tiers, Part B &amp; caveats →</span>
+  </div>
+</div>
+
+<div class="page">
+  <h1>Complexity Tiers, Monthly Workload &amp; Reference Notes</h1>
+  <p class="subtitle">page 2 of 2 — how the Part A total maps to a tier, and how Part B's Monthly WU is calculated</p>
+  <div class="disclaimer"><strong>⚠ Unvalidated draft instrument (Draft v0.1).</strong> Weights are reasoned starting points, not empirically derived. Do not use scores alone to justify staffing or budget decisions until the Part E calibration (content validity, inter-rater reliability, capacity-constant time study) is complete.</div>
+  <div class="boxrow">
+    <div class="box">
+      <div class="boxtitle">Complexity tiers</div>
+      <table class="tiertable"><thead><tr><th>Tier</th><th>Total score</th><th>Label</th></tr></thead><tbody><tr><td class="tiernum">Tier 1</td><td>≤ 20</td><td>Minimal</td></tr><tr><td class="tiernum">Tier 2</td><td>21–38</td><td>Low</td></tr><tr><td class="tiernum">Tier 3</td><td>39–58</td><td>Moderate</td></tr><tr><td class="tiernum">Tier 4</td><td>59–76</td><td>High</td></tr><tr><td class="tiernum">Tier 5</td><td>≥ 77</td><td>Very high</td></tr></tbody></table>
+    </div>
+    <div class="box">
+      <div class="boxtitle">Part A — 100-pt breakdown</div>
+      <table class="summarytable"><thead><tr><th>Domain</th><th>Items</th><th>Max pts</th></tr></thead><tbody><tr><td><span class="swatch" style="background:#2a78d6"></span>Domain 1</td><td>5</td><td>18</td></tr><tr><td><span class="swatch" style="background:#eb6834"></span>Domain 2</td><td>4</td><td>12</td></tr><tr><td><span class="swatch" style="background:#1baf7a"></span>Domain 3</td><td>5</td><td>18</td></tr><tr><td><span class="swatch" style="background:#eda100"></span>Domain 4</td><td>4</td><td>12</td></tr><tr><td><span class="swatch" style="background:#e87ba4"></span>Domain 5</td><td>6</td><td>16 <span class="capnote">(18→16)</span></td></tr><tr><td><span class="swatch" style="background:#008300"></span>Domain 6</td><td>4</td><td>12</td></tr><tr><td><span class="swatch" style="background:#4a3aa7"></span>Domain 7</td><td>4</td><td>12</td></tr><tr class="totalrow"><td>Total</td><td>32</td><td>100</td></tr></tbody></table>
+    </div>
+    <div class="box">
+      
+<div class="box formulabox">
+  <div class="boxtitle">Part B — Monthly Workload Units (WU)</div>
+  <div class="formula">Monthly WU&nbsp;=&nbsp;(Static WU<sub>tier</sub>&nbsp;+&nbsp;&Sigma; participants&times;WU<sub>status,tier</sub>)&nbsp;&times;&nbsp;Phase multiplier</div>
+</div>
+
+      <table class="wutable"><thead><tr><th>Tier</th><th>Static WU / month</th></tr></thead><tbody><tr><td>Tier 1</td><td>2</td></tr><tr><td>Tier 2</td><td>4</td></tr><tr><td>Tier 3</td><td>8</td></tr><tr><td>Tier 4</td><td>14</td></tr><tr><td>Tier 5</td><td>22</td></tr></tbody></table>
+    </div>
+    <div class="box">
+      <div class="boxtitle">Per-participant WU / month by tier</div>
+      <table class="wutable participanttable"><thead><tr><th>Status</th><th>T1</th><th>T2</th><th>T3</th><th>T4</th><th>T5</th></tr></thead><tbody><tr><td class="statuslabel">In screening / consent</td><td>0.5</td><td>1</td><td>1.5</td><td>2.5</td><td>3.5</td></tr><tr><td class="statuslabel">Active intervention / on-treatment</td><td>1</td><td>2</td><td>3.5</td><td>6</td><td>9</td></tr><tr><td class="statuslabel">Active follow-up (protocol visits)</td><td>0.5</td><td>1</td><td>1.5</td><td>2.5</td><td>3.5</td></tr><tr><td class="statuslabel">Long-term follow-up (annual contact)</td><td>0.1</td><td>0.2</td><td>0.3</td><td>0.5</td><td>0.7</td></tr><tr><td class="statuslabel">Closed to accrual, data cleaning/closeout</td><td>0.2</td><td>0.3</td><td>0.5</td><td>0.8</td><td>1</td></tr></tbody></table>
+    </div>
+    <div class="box">
+      <table class="wutable"><thead><tr><th>Phase condition (pick one)</th><th>Multiplier</th></tr></thead><tbody><tr><td>Startup (activation −3 mo to first enrollment)</td><td>×1.6</td></tr><tr><td>Steady state</td><td>×1</td></tr><tr><td>Substantive amendment month (+ following month)</td><td>×1.3</td></tr><tr><td>Audit/inspection or monitoring visit month</td><td>×1.4</td></tr><tr><td>Closeout quarter</td><td>×1.2</td></tr></tbody></table>
+    </div>
+    
+<div class="box caveatsbox">
+  <div class="boxtitle">Known ambiguities &amp; interpretive calls</div>
+  <ul>
+    <li><strong>Domain 5 cap.</strong> Items sum to 18; the domain contributes at most <strong>16</strong> to the 100-pt total — this is why the 7 domain maxima sum to exactly 100.</li>
+    <li><strong>Phase multiplier scope.</strong> Applies to the <strong>protocol total</strong> (Static + participant WU), not just the participant term — the source table's caption says "apply to the protocol total."</li>
+    <li><strong>Multiplier stacking</strong> is undefined if two conditions land in the same month. Apply exactly one; note your reasoning.</li>
+    <li><strong>FTE figure</strong> (if calculated) is for <strong>this protocol only</strong> — not a staffing determination. Portfolio FTE needs role-separated WU + a concurrency penalty (see rubric).</li>
+  </ul>
+</div>
+
+  </div>
+  <div class="pagefooter">
+    <span>Non-Malignant Hematology Protocol Complexity &amp; Workload Rubric, Draft v0.1 — unvalidated draft</span>
+    <span>Live tool: https://jhodges38104.github.io/hem-protocol-scoring-tool/</span>
+  </div>
+</div>
+</body>
+</html>
