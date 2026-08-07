@@ -1,6 +1,6 @@
 /* HEM Protocol Complexity & Workload Tool — styles
-   Tokens follow a validated ordinal ramp (tier swatches) and a neutral
-   chrome/ink palette; see README for how these were derived/validated. */
+   Tier-swatch colors use a validated ordinal color ramp; general chrome/ink
+   tokens are a neutral light/dark palette. See CLAUDE.md for repo context. */
 
 :root {
   color-scheme: light;

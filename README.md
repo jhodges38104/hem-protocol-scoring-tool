@@ -35,10 +35,12 @@ you type; nothing is transmitted anywhere. From the **Export** section you can:
 
 ## GitHub Pages
 
-Already deployed from this repo: `main` branch, `/ (root)`, at
-https://jhodges38104.github.io/hem-protocol-scoring-tool/ — Settings → Pages
-in the repo shows the same config. To change the source branch/path, or to
-redeploy after edits, just push to `main`; Pages rebuilds automatically.
+Deployed via `.github/workflows/pages.yml` — a GitHub Actions workflow
+(`actions/upload-pages-artifact` + `actions/deploy-pages`) that runs on every
+push to `main`, or manually via `gh workflow run pages.yml`. Live at
+https://jhodges38104.github.io/hem-protocol-scoring-tool/. (This replaced an
+earlier "deploy from a branch" / Jekyll setup that failed unpredictably with
+no useful error detail.)
 
 This repo is **public**, which is a requirement, not a preference: GitHub
 Pages on a *private* repo needs GitHub Enterprise Cloud. Switching this repo
