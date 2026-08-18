@@ -1,11 +1,23 @@
 // HEM Protocol Complexity & Workload Tool
 // Implements the arithmetic in "Non-Malignant Hematology Protocol Complexity &
-// Workload Rubric, Draft v0.1" (Parts A and B). Everything runs client-side;
+// Workload Rubric, Draft v0.2" (Parts A and B). Everything runs client-side;
 // nothing is transmitted anywhere.
+//
+// v0.2 change (see docs/rubric.md "v0.2 change note"): added Domain 8 (Data
+// Volume, Abstraction & Registry Burden) and a Part B data-volume factor.
+// Motivated by a review comment that data-entry-heavy registries (ATHN,
+// SCCRIP, SCDIC-II, REALAnswr, MOTIVATE-shaped protocols) had no way to score
+// above Tier 2 even maxing the old Domain 5 cap. v0.1's seven domains and
+// their weights are otherwise untouched — a protocol scoring zero on every
+// Domain 8 item scores and tiers identically under v0.2 as it did under v0.1.
 
-const RUBRIC_VERSION = 'Draft v0.1';
-const TOOL_VERSION = '1.0.0';
+const RUBRIC_VERSION = 'Draft v0.2';
+const TOOL_VERSION = '2.0.0';
 const LS_KEY = 'hemProtocolScoringTool.v1';
+// Bumped 1 → 2 because v0.2 added five Domain 8 item ids that a schema-1
+// export won't contain. onImportJsonFile() checks this and warns rather than
+// silently treating a pre-Domain-8 export as a complete v0.2 score.
+const SCHEMA_VERSION = 2;
 
 // ─────────────────────────────────────────────────────────────────────────
 // Config — transcribed from the source rubric
@@ -79,6 +91,16 @@ const DOMAINS = [
       { id: 'dissemination', label: 'Dissemination obligations beyond manuscript', max: 2, note: 'community reports, policy briefs, stakeholder convenings' },
     ],
   },
+  {
+    id: 'd8', title: 'Domain 8 — Data Volume, Abstraction & Registry Burden',
+    items: [
+      { id: 'chart_abstraction', label: 'Chart/EHR abstraction burden', max: 4, note: '0 = none; 4 = comprehensive structured abstraction of the full record at every encounter (concurrent or retrospective)', dataVolume: true },
+      { id: 'diary_pro_frequency', label: 'Diary/PRO review frequency', max: 3, note: "0 = none or ≤1/yr; 3 = continuous/near-real-time patient diary requiring ongoing physician review. Distinct from Domain 5's ePRO item, which scores administering the instrument, not reviewing entries.", dataVolume: true },
+      { id: 'consortium_dcc', label: 'External registry/consortium/DCC submission cadence', max: 3, note: '0 = none; 3 = recurring structured submission to an external data-coordinating center on a fixed cadence' },
+      { id: 'substudy_layering', label: 'Linked sub-studies / optional data modules', max: 3, note: '0 = none; 3 = ≥4 layered sub-studies, each with its own specimen/data cadence' },
+      { id: 'lifetime_horizon', label: 'Open-ended/lifetime data-collection horizon', max: 3, note: "0 = fixed end date <2 yr out; 3 = open-ended/lifetime cohort with no defined data-collection end date. Distinct from Domain 6's LTFU item, which scores safety follow-up duration, not data-submission duration." },
+    ],
+  },
 ];
 
 // Derive each domain's itemized max and effective (post-cap) max once.
@@ -87,6 +109,28 @@ for (const d of DOMAINS) {
   d.max = d.cap != null ? d.cap : d.itemizedMax;
 }
 
+// Part A total (sum of all domain maxima) — computed, not hardcoded, so it
+// can't drift from DOMAINS. v0.1 was 100 across 7 domains; v0.2 is 116 across
+// 8 (Domain 8 adds 16). TIERS below is intentionally left as v0.1 defined it
+// — see the TIERS comment.
+const PART_A_MAX = DOMAINS.reduce((sum, d) => sum + d.max, 0);
+
+// The two Domain 8 items that describe per-encounter data-entry intensity
+// (as opposed to protocol-level structural items like DCC cadence or
+// lifetime horizon, which already flow into Part B correctly via tier).
+// These drive DATA_VOLUME_FACTOR in computeAll() — see docs/rubric.md's
+// Part B section for why only these two, and why the cap is 1.3 not higher.
+const DATA_VOLUME_ITEMS = DOMAINS.flatMap((d) => d.items).filter((it) => it.dataVolume);
+const DATA_VOLUME_MAX = DATA_VOLUME_ITEMS.reduce((sum, it) => sum + it.max, 0);
+const DATA_VOLUME_FACTOR_RANGE = 0.3; // factor runs 1.0 (no data-volume burden) to 1.3 (max)
+
+// Cutoffs are unchanged from v0.1 on purpose — see the header comment. Since
+// Domain 8 only adds points (never subtracts), a v0.1 protocol re-scored
+// under v0.2 with identical Domain-8-eligible items at 0 lands on the exact
+// same tier. The practical effect of the wider 0–116 range with the same
+// cutoffs is that Tier 5 (≥77) is reachable over a wider span than before —
+// that's intentional, not a bug: it's what lets a data-volume-heavy registry
+// climb without re-tiering every existing interventional protocol.
 const TIERS = [
   { n: 1, label: 'Minimal', max: 20 },
   { n: 2, label: 'Low', max: 38 },
@@ -183,7 +227,7 @@ function collectState() {
   const participants = {};
   for (const r of STATUS_ROWS) participants[r.id] = strVal(`p_${r.id}`);
   return {
-    schema: 1,
+    schema: SCHEMA_VERSION,
     toolVersion: TOOL_VERSION,
     rubricVersion: RUBRIC_VERSION,
     meta: {
@@ -255,10 +299,17 @@ function computeAll() {
   const total = domainScores.reduce((sum, ds) => sum + ds.capped, 0);
   const tier = tierFor(total);
 
+  // Data volume factor: scales only the participant-WU term (not Static WU),
+  // driven only by the two per-encounter Domain 8 items (chart/EHR
+  // abstraction + diary/PRO frequency) — not the whole domain, so it doesn't
+  // double-count the structural items that already raised the total/tier.
+  const dataVolumeRaw = DATA_VOLUME_ITEMS.reduce((sum, it) => sum + clampInt(s.items[it.id], 0, it.max), 0);
+  const dataVolumeFactor = 1 + DATA_VOLUME_FACTOR_RANGE * (DATA_VOLUME_MAX > 0 ? dataVolumeRaw / DATA_VOLUME_MAX : 0);
+
   const rows = STATUS_ROWS.map((r) => {
     const count = clampInt(s.participants[r.id], 0, 999999);
     const perUnit = r.wu[tier.n];
-    const subtotal = count * perUnit;
+    const subtotal = count * perUnit * dataVolumeFactor;
     return { row: r, count, perUnit, subtotal };
   });
   const participantSubtotal = rows.reduce((sum, r) => sum + r.subtotal, 0);
@@ -270,7 +321,7 @@ function computeAll() {
   const C = clampFloatOrNull(s.capacityConstant, 0);
   const fte = C && C > 0 ? monthlyWU / C : null;
 
-  return { state: s, domainScores, total, tier, rows, participantSubtotal, staticWU, preMultiplier, phase, monthlyWU, C, fte };
+  return { state: s, domainScores, total, tier, dataVolumeRaw, dataVolumeFactor, rows, participantSubtotal, staticWU, preMultiplier, phase, monthlyWU, C, fte };
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -313,11 +364,12 @@ function updateDomainSubtotals(domainScores) {
 }
 
 function renderPartBBreakdown(computed) {
-  const { rows, staticWU, preMultiplier, phase, monthlyWU, tier } = computed;
+  const { rows, staticWU, preMultiplier, phase, monthlyWU, tier, dataVolumeRaw, dataVolumeFactor } = computed;
   $('pbTierBadge').innerHTML = tierBadgeHTML(tier);
 
   const parts = [];
-  parts.push(`<table class="wu-table"><thead><tr><th>Status</th><th>Count</th><th>WU/participant (Tier ${tier.n})</th><th>Subtotal</th></tr></thead><tbody>`);
+  parts.push(`<p class="section-help">Data volume factor (Domain 8, items 8.1+8.2 only): ${dataVolumeRaw} / ${DATA_VOLUME_MAX} → <strong>×${fmt2(dataVolumeFactor)}</strong>. Applied to participant WU below, not Static WU.</p>`);
+  parts.push(`<table class="wu-table"><thead><tr><th>Status</th><th>Count</th><th>Base WU/participant (Tier ${tier.n})</th><th>Subtotal (× data volume)</th></tr></thead><tbody>`);
   for (const r of rows) {
     parts.push(`<tr><td>${r.row.label}</td><td class="num">${r.count}</td><td class="num">${fmt1(r.perUnit)}</td><td class="num">${fmt1(r.subtotal)}</td></tr>`);
   }
@@ -343,7 +395,7 @@ function metaRow(label, value) {
 }
 
 function renderReport(computed) {
-  const { state: s, domainScores, total, tier, rows, staticWU, preMultiplier, phase, monthlyWU, C, fte } = computed;
+  const { state: s, domainScores, total, tier, rows, staticWU, preMultiplier, phase, monthlyWU, C, fte, dataVolumeRaw, dataVolumeFactor } = computed;
   const meta = s.meta;
   const parts = [];
 
@@ -358,7 +410,7 @@ function renderReport(computed) {
   parts.push(`</table>`);
 
   parts.push(`<div class="summary-tiles">`);
-  parts.push(`<div class="tile"><div class="tile-label">Part A total</div><div class="tile-value">${total}<span class="tile-max"> / 100</span></div></div>`);
+  parts.push(`<div class="tile"><div class="tile-label">Part A total</div><div class="tile-value">${total}<span class="tile-max"> / ${PART_A_MAX}</span></div></div>`);
   parts.push(`<div class="tile"><div class="tile-label">Complexity tier</div><div class="tile-value">${tierBadgeHTML(tier)}</div></div>`);
   parts.push(`<div class="tile"><div class="tile-label">Monthly workload</div><div class="tile-value">${fmt1(monthlyWU)}<span class="tile-max"> WU</span></div></div>`);
   if (fte != null) {
@@ -379,11 +431,11 @@ function renderReport(computed) {
     parts.push(`<tr class="subtotal-row"><td>Domain subtotal</td><td class="num">${subtotalText} / ${d.max}</td></tr>`);
     parts.push(`</tbody></table>`);
   }
-  parts.push(`<div class="total-row-block">Total Part A score: <strong>${total} / 100</strong> → ${tierBadgeHTML(tier)}</div>`);
+  parts.push(`<div class="total-row-block">Total Part A score: <strong>${total} / ${PART_A_MAX}</strong> → ${tierBadgeHTML(tier)}</div>`);
 
   parts.push(`<h3>Part B — monthly workload detail</h3>`);
-  parts.push(`<p class="section-help">Tier ${tier.n} per-participant rates; phase condition: ${phase.label} (×${phase.value}).</p>`);
-  parts.push(`<table class="wu-table"><thead><tr><th>Status</th><th>Count</th><th>WU/participant</th><th>Subtotal</th></tr></thead><tbody>`);
+  parts.push(`<p class="section-help">Tier ${tier.n} per-participant rates; phase condition: ${phase.label} (×${phase.value}); data volume factor (Domain 8.1+8.2, ${dataVolumeRaw}/${DATA_VOLUME_MAX}): ×${fmt2(dataVolumeFactor)}, applied to participant WU only.</p>`);
+  parts.push(`<table class="wu-table"><thead><tr><th>Status</th><th>Count</th><th>Base WU/participant</th><th>Subtotal (× data volume)</th></tr></thead><tbody>`);
   for (const r of rows) {
     parts.push(`<tr><td>${r.row.label}</td><td class="num">${r.count}</td><td class="num">${fmt1(r.perUnit)}</td><td class="num">${fmt1(r.subtotal)}</td></tr>`);
   }
@@ -402,7 +454,7 @@ function renderReport(computed) {
   }
 
   parts.push(`<div class="report-footer">`);
-  parts.push(`<p><strong>Unvalidated draft instrument</strong> (${RUBRIC_VERSION}). Not for staffing or budget decisions until the Part E calibration — content validity, inter-rater reliability (target weighted κ ≥ 0.70 item-level, ICC ≥ 0.80 total), criterion validity/capacity-constant time study, and known-groups check — is complete. Re-score annually and on any amendment touching Domains 3, 4, 5, or 6 (Part C). Two independent scorers should reconcile raw item scores for reliability tracking (Part C/D).</p>`);
+  parts.push(`<p><strong>Unvalidated draft instrument</strong> (${RUBRIC_VERSION}). Not for staffing or budget decisions until the Part E calibration — content validity, inter-rater reliability (target weighted κ ≥ 0.70 item-level, ICC ≥ 0.80 total), criterion validity/capacity-constant time study, and known-groups check — is complete. Re-score annually and on any amendment touching Domains 3, 4, 5, 6, or 8 (Part C). Two independent scorers should reconcile raw item scores for reliability tracking (Part C/D).</p>`);
   parts.push(`<p class="generated-at">Generated ${escapeHtml(new Date().toLocaleString())} · HEM CTM Protocol Complexity &amp; Workload Tool v${TOOL_VERSION}</p>`);
   parts.push(`</div>`);
 
@@ -492,6 +544,9 @@ function exportCsv() {
   for (const r of STATUS_ROWS) add(`participants_${r.id}`, clampInt(s.participants[r.id], 0, 999999));
   add('phase_id', computed.phase.id);
   add('phase_multiplier', computed.phase.value);
+  add('data_volume_raw', computed.dataVolumeRaw);
+  add('data_volume_max', DATA_VOLUME_MAX);
+  add('data_volume_factor', fmt2(computed.dataVolumeFactor));
   add('static_wu', computed.staticWU);
   add('participant_wu_subtotal', fmt1(computed.participantSubtotal));
   add('pre_multiplier_total', fmt1(computed.preMultiplier));
@@ -520,7 +575,11 @@ function onImportJsonFile(e) {
       const obj = JSON.parse(String(reader.result));
       if (!obj || typeof obj !== 'object' || !obj.items || !obj.meta) throw new Error('missing items/meta');
       applyState(obj);
-      showImportFeedback('');
+      if (obj.schema !== SCHEMA_VERSION) {
+        showImportFeedback(`Imported a schema ${obj.schema ?? '?'} export — this predates Domain 8 (Data Volume, Abstraction & Registry Burden, Rubric v0.2). Its five items weren't in that file and are set to 0 here. Score them before treating this total/tier as current.`);
+      } else {
+        showImportFeedback('');
+      }
       update();
     } catch (err) {
       showImportFeedback('Could not import that file — it does not look like a JSON export from this tool.');

@@ -2,14 +2,16 @@
 
 This page is the canonical, citable write-up of the scoring rules the [tool](../index.html) implements. Numbers here are the single source of truth for this project — the [quick guide](quick-guide.md) and [user guide](user-guide.md) link to specific sections instead of restating tables, so there's one place to update if the rubric changes.
 
-> **Status: unvalidated draft (v0.1).** This is a reasoned starting point, not an empirically derived instrument. Section 6 (Validation plan) below specifies the calibration work required before scores drive any staffing or budget decision. Nothing on this page should be read as having cleared that bar yet.
+> **Status: unvalidated draft (v0.2).** This is a reasoned starting point, not an empirically derived instrument. Section 6 (Validation plan) below specifies the calibration work required before scores drive any staffing or budget decision. Nothing on this page should be read as having cleared that bar yet.
 
-Source: internal HEM CTM draft, [*Non-Malignant Hematology Protocol Complexity & Workload Rubric (Draft v0.1)*](TrialComplexityRubric.pdf) — the original PDF is included alongside this file. This write-up reorganizes and lightly expands that draft for readability and adds the [References](#references) section; it does not change any weight, range, or formula.
+Source: internal HEM CTM draft, [*Non-Malignant Hematology Protocol Complexity & Workload Rubric (Draft v0.1)*](TrialComplexityRubric.pdf) — the original PDF is included alongside this file. This write-up reorganizes and lightly expands that draft for readability and adds the [References](#references) section; it does not change any weight, range, or formula from the source PDF.
+
+> **v0.2 change note.** A review-meeting question — "how does this capture something very data-entry heavy, on the scale of ATHN or MOTIVATE?" — surfaced a real gap: v0.1's Domain 5 cap (16 pts) meant a protocol that was *all* data-entry burden and nothing else (no visits, no IP, minimal safety reporting) topped out around Tier 2, regardless of how much registry/abstraction work it actually generated. v0.2 adds [Domain 8](#domain-8--data-volume-abstraction--registry-burden-016) (16 pts, bringing the Part A total to 116) and a [Part B data volume factor](#3-part-b--monthly-workload-index) driven by two of its items. This is additive only: v0.1's seven domains, their weights, and the tier cutoffs are unchanged, so a protocol scoring zero on every Domain 8 item scores and tiers identically to how it scored under v0.1. Anchors were sanity-checked (not statistically validated — that's still Section 6) by scoring SCCRIP, ATHN, SCDIC-II, and REALAnswr against this portfolio's existing OPAL-based complexity ledger and confirming the ordering held.
 
 ## Contents
 
 1. [Purpose](#1-purpose)
-2. [Part A — Protocol Complexity Score](#2-part-a--protocol-complexity-score-100-points)
+2. [Part A — Protocol Complexity Score](#2-part-a--protocol-complexity-score-116-points)
 3. [Part B — Monthly Workload Index](#3-part-b--monthly-workload-index)
 4. [Converting WU to FTE](#4-converting-wu-to-fte)
 5. [Governance](#5-governance)
@@ -18,13 +20,13 @@ Source: internal HEM CTM draft, [*Non-Malignant Hematology Protocol Complexity &
 
 ## 1. Purpose
 
-Two linked instruments. **Part A** scores a protocol's intrinsic complexity once, at feasibility review, and again on annual re-score or any amendment touching Domains 3, 4, 5, or 6. **Part B** converts that score plus live accrual into a monthly workload figure for staffing conversations. The two are kept separate deliberately: a very complex protocol with two enrolled participants generates less month-to-month work than a simple registry with 400.
+Two linked instruments. **Part A** scores a protocol's intrinsic complexity once, at feasibility review, and again on annual re-score or any amendment touching Domains 3, 4, 5, 6, or 8. **Part B** converts that score plus live accrual into a monthly workload figure for staffing conversations. The two are kept separate deliberately: a very complex protocol with two enrolled participants generates less month-to-month work than a simple registry with 400.
 
-**Why not an existing oncology tool.** Two published instruments already do something similar for oncology treatment trials — OPAL and IWAT (see [References](#references)). Both are anchored in patient-facing treatment encounters. This draft adds weight for three things that dominate a non-malignant hematology portfolio and are absent or underweighted in those tools: long-horizon follow-up obligations (gene therapy LTFU), observational/registry data burden, and qualitative/community-engaged components (Domain 7).
+**Why not an existing oncology tool.** Two published instruments already do something similar for oncology treatment trials — OPAL and IWAT (see [References](#references)). Both are anchored in patient-facing treatment encounters. This draft adds weight for three things that dominate a non-malignant hematology portfolio and are absent or underweighted in those tools: long-horizon follow-up obligations (gene therapy LTFU), observational/registry data burden (Domain 5, and — after v0.2 found Domain 5 alone insufficient for registries like ATHN or SCCRIP — Domain 8), and qualitative/community-engaged components (Domain 7).
 
-## 2. Part A — Protocol Complexity Score (100 points)
+## 2. Part A — Protocol Complexity Score (116 points)
 
-Score each item once. Anchors are given for the low and high end of each item's range; interpolate for values in between — see the [user guide's scoring-method section](user-guide.md#how-to-score-part-a) for how to do that consistently. Domain contributions sum to a 100-point total.
+Score each item once. Anchors are given for the low and high end of each item's range; interpolate for values in between — see the [user guide's scoring-method section](user-guide.md#how-to-score-part-a) for how to do that consistently. Domain contributions sum to a 116-point total across eight domains (v0.2 — v0.1's seven domains summed to 100; see [Domain 8](#domain-8--data-volume-abstraction--registry-burden-016)).
 
 ### Domain 1 — Regulatory & Sponsorship Framework (0–18)
 
@@ -75,7 +77,7 @@ Score each item once. Anchors are given for the low and high end of each item's 
 | PRO/ePRO administration | 0–2 | — |
 | Linked or derived data (geospatial, EHR extract, genomic) | 0–3 | includes SDOH/neighborhood-level linkage |
 
-Items sum to 18. **The domain's contribution to the 100-point total is capped at 16.** This cap is why the seven domain maxima (18+12+18+12+**16**+12+12) sum to exactly 100 instead of 102 — it's load-bearing, not a rounding nicety, and the tool always shows both the raw itemized sum and the capped value when they differ.
+Items sum to 18. **The domain's contribution to the total is capped at 16.** In v0.1 this cap was why the seven domain maxima (18+12+18+12+**16**+12+12) summed to exactly 100 instead of 102. That's still true in v0.2, just against a 116-point total (18+12+18+12+**16**+12+12+**16** — see Domain 8 below) — the cap itself hasn't moved, and the tool still always shows both the raw itemized sum and the capped value when they differ.
 
 ### Domain 6 — Safety Reporting & Monitoring (0–12)
 
@@ -95,6 +97,22 @@ Items sum to 18. **The domain's contribution to the 100-point total is capped at
 | Community advisory board or partner site coordination | 0–2 | — |
 | Dissemination obligations beyond manuscript | 0–2 | community reports, policy briefs, stakeholder convenings |
 
+### Domain 8 — Data Volume, Abstraction & Registry Burden (0–16)
+
+*Added in v0.2.* Domains 1–7 assume a study generates complexity mainly through visits, IP, and safety reporting. A protocol can be almost entirely data-entry burden — a registry or natural-history cohort with no extra visits, no IP, and light safety reporting — and score near zero on Domains 3, 4, and 6. This domain gives that shape of protocol somewhere to score.
+
+| Item | Range | Notes |
+|---|---|---|
+| Chart/EHR abstraction burden | 0–4 | 0 = none; 4 = comprehensive structured abstraction of the full record at every encounter (concurrent or retrospective) |
+| Diary/PRO review frequency | 0–3 | 0 = none or ≤1/yr; 3 = continuous/near-real-time patient diary requiring ongoing physician review. Distinct from Domain 5's PRO/ePRO item, which scores *administering* the instrument, not reviewing entries as they accumulate. |
+| External registry/consortium/DCC submission cadence | 0–3 | 0 = none; 3 = recurring structured submission to an external data-coordinating center on a fixed cadence |
+| Linked sub-studies / optional data modules | 0–3 | 0 = none; 3 = ≥4 layered sub-studies, each with its own specimen/data cadence |
+| Open-ended/lifetime data-collection horizon | 0–3 | 0 = fixed end date <2 yr out; 3 = open-ended/lifetime cohort with no defined data-collection end date. Distinct from Domain 6's LTFU item, which scores safety follow-up duration, not data-submission duration. |
+
+Items sum to 16; no cap is needed (unlike Domain 5, the itemized sum already equals the domain's contribution).
+
+**Why only two of these five items drive Part B's data volume factor.** Chart/EHR abstraction and diary/PRO frequency describe *per-encounter* burden — how much work touches each participant each time. The other three (DCC cadence, sub-study count, lifetime horizon) are protocol-level structural facts that already raise the Part A total and therefore the tier — and tier already sets both Static WU and every per-participant rate in Part B. Feeding all five items into the Part B multiplier as well would double-count the structural three. See [Part B](#3-part-b--monthly-workload-index) below.
+
 ### Complexity tiers
 
 | Total | Tier | Label |
@@ -105,15 +123,29 @@ Items sum to 18. **The domain's contribution to the 100-point total is capped at
 | 59–76 | 4 | High |
 | ≥ 77 | 5 | Very high |
 
+These cutoffs are unchanged from v0.1, deliberately: Domain 8 only adds points, never subtracts, so a protocol scoring zero on it tiers identically under v0.2 as it did under v0.1 — nothing already scored gets re-tiered by this change. The visible effect is that Tier 5 (≥77) now spans a wider raw-score range (77–116 instead of 77–100), which is what lets a data-volume-heavy registry climb into High/Very High without touching the boundary any existing interventional protocol sits on.
+
 The rubric does not define what a given tier implies operationally (staffing action, review cadence, etc.) — that mapping is exactly what the [time study in Section 6](#6-validation-plan) is meant to produce. Until it exists, tier is a relative ranking within your own portfolio, not an absolute threshold. See the user guide's [interpreting results](user-guide.md#interpreting-your-result) section for how to read a tier and a total without overreaching.
 
 ## 3. Part B — Monthly Workload Index
 
 ```
-Monthly WU = (Static WU[tier] + Σ (participants in status × per-participant WU[status, tier])) × Phase multiplier
+Monthly WU = (Static WU[tier] + Data Volume Factor × Σ (participants in status × per-participant WU[status, tier])) × Phase multiplier
 ```
 
 The source draft's formula box reads, under normal operator precedence, as applying the phase multiplier only to the participant term. But the phase multiplier table (below) is explicitly captioned "apply to the protocol total." **This tool follows the caption**, multiplying the full static-plus-participant sum. At Tier 4 with 3 participants in screening and 2 on-treatment during a startup month, that's `(14 + 7.5 + 12) × 1.6 = 53.6`, not `14 + 19.5×1.6 = 45.2`. If your team reads the source draft differently, say so — this is a genuine ambiguity in v0.1, not a settled interpretation, and it changes the output by double digits of percent.
+
+### Data Volume Factor *(new in v0.2)*
+
+```
+Data Volume Factor = 1 + 0.3 × (chart-abstraction score + diary/PRO-frequency score) / 7
+```
+
+Range 1.0 (neither item scored) to 1.3 (both items maxed). It multiplies only the participant-WU term, not Static WU — the rationale in both cases is the same one the user asked for directly: two protocols in the same tier with the same participant counts can differ hugely in how much data-entry work each participant-encounter actually generates, and tier/status alone don't capture that. A registry where every visit means pulling a full structured chart abstraction plus reviewing a continuous patient diary (factor 1.3) costs meaningfully more coordinator time per participant than one where the same tier comes from, say, visit burden or IP handling instead (factor 1.0).
+
+Deliberately narrow: only Domain 8's two *per-encounter* items feed this factor (see [Domain 8](#domain-8--data-volume-abstraction--registry-burden-016) for why the other three don't). The cap is 1.3, not higher, because this is an unvalidated instrument — a bigger multiplier is a bigger claim than the current evidence supports; Section 6's time study is what would earn a wider range.
+
+**Worked example.** A Tier 3 registry with the chart-abstraction item at 4/4 and diary/PRO-frequency at 2/3: factor = 1 + 0.3×(6/7) ≈ 1.26 (the tool carries full precision internally; only the displayed factor is rounded to two decimals). With 40 participants in active follow-up (Tier 3 rate 1.5 WU each): participant subtotal = 40 × 1.5 × 1.2571… ≈ 75.4 WU, versus 60 WU without the factor — a ~26% increase specifically attributable to per-encounter data burden, on top of whatever Domain 8's structural items already did to the tier itself.
 
 ### Static WU — accrues whether or not anyone is enrolled
 
@@ -170,7 +202,7 @@ The tool's optional FTE readout is explicitly scoped to one protocol — it is n
 
 - **Score at feasibility review**, before institutional commitment. The score is an input to the go/no-go decision, not a post-hoc justification for one already made.
 - **Two independent scorers, reconciled.** Log both raw scores — reliability testing (Section 6) needs them.
-- **Re-score annually**, and on any amendment touching Domains 3, 4, 5, or 6.
+- **Re-score annually**, and on any amendment touching Domains 3, 4, 5, 6, or 8.
 - **Freeze weights for 12 months** once calibrated. Mid-cycle weight changes destroy the trend data that makes this useful for budget requests.
 
 ### Build notes
@@ -186,7 +218,7 @@ Given the intended use — staffing and budget justification — face validity i
 1. **Content validity.** A panel of 6–8 (CRC, regulatory coordinator, data manager, nurse, PI, finance) rates each item for relevance; compute I-CVI/S-CVI (Lynn 1986; Polit & Beck 2006 — see [References](#references)) and drop items scoring below 0.78.
 2. **Inter-rater reliability.** 20–25 protocols spanning all five tiers, two independent scorers. Target weighted κ ≥ 0.70 at item level (Cohen 1968), ICC ≥ 0.80 on total score (Shrout & Fleiss 1979; Koo & Li 2016 for reporting practice). Items that fail need better anchors, not removal.
 3. **Criterion validity / capacity constant.** A 6–8 week prospective time study on a stratified sample of staff. Regress actual hours on predicted WU — the slope gives you *C*; the residuals tell you which domains are mis-weighted.
-4. **Known-groups check.** Scores should separate protocols staff already identify as heavy vs. light. If they don't, the instrument is wrong and the staff are right.
+4. **Known-groups check.** Scores should separate protocols staff already identify as heavy vs. light. If they don't, the instrument is wrong and the staff are right. Domain 8 and the data volume factor (v0.2) were sanity-checked this way informally — SCCRIP, ATHN, SCDIC-II, and REALAnswr were scored against this portfolio's existing OPAL-based complexity ledger and the relative ordering held — but that is not a substitute for running the formal check on the full item set once real inter-rater data exists.
 5. **Re-calibration every 24 months**, or after any material change in portfolio composition.
 
 Steps 1–3 constitute a publishable methods paper — there is a documented gap for complexity instruments outside oncology, and a non-malignant hematology instrument covering interventional, observational, and qualitative designs would fill it.

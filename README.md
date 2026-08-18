@@ -1,7 +1,7 @@
 # HEM Protocol Complexity & Workload Tool
 
 A static, single-page calculator for the **Non-Malignant Hematology Protocol
-Complexity & Workload Rubric (Draft v0.1)**. HEM CTM staff enter a protocol's
+Complexity & Workload Rubric (Draft v0.2)**. HEM CTM staff enter a protocol's
 Part A item scores and Part B monthly participant counts; the page computes
 domain subtotals, the complexity tier, and the Monthly Workload Units (WU)
 figure, and can print/export the result.
@@ -54,9 +54,23 @@ The source PDF is a draft and left a few things ambiguous. Where it did, this
 tool made an explicit choice rather than guessing silently:
 
 - **Domain 5 cap.** Items sum to 18, but the domain's contribution to the
-  100-point total is capped at 16 (stated directly in the source and required
-  for the domain maxima to sum to exactly 100). The UI shows both the raw
-  itemized sum and the capped value whenever they differ.
+  total is capped at 16 (stated directly in the source and required for the
+  domain maxima to sum to exactly 100 in v0.1 / 116 in v0.2 — see Domain 8
+  below). The UI shows both the raw itemized sum and the capped value
+  whenever they differ.
+- **Domain 8 and the data volume factor (v0.2, additive).** A review question
+  — "how does this capture something very data-entry heavy, on the scale of
+  ATHN or MOTIVATE?" — found that v0.1's Domain 5 cap left registries and
+  natural-history cohorts (heavy data entry, light visits/IP/safety
+  reporting) unable to score above roughly Tier 2 even maxing every relevant
+  item. v0.2 adds Domain 8 (Data Volume, Abstraction & Registry Burden, 16
+  pts, bringing the Part A total to 116) and a Part B data volume factor
+  (×1.0–×1.3 on participant WU only) driven by two of Domain 8's five items
+  (chart/EHR abstraction, diary/PRO frequency — the other three are
+  protocol-level and already flow through tier, so they aren't double-counted
+  in the multiplier). v0.1's tier cutoffs are unchanged, so a protocol scoring
+  zero on Domain 8 scores and tiers identically to before. Full rationale and
+  a worked example: [docs/rubric.md](docs/rubric.md#3-part-b--monthly-workload-index).
 - **Phase multiplier scope.** The formula is presented as
   `Static WU + Σ(participant WU) × Phase multiplier`, which under normal
   operator precedence would apply the multiplier only to the participant
