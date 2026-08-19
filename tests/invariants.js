@@ -39,7 +39,19 @@ function stubEl(id) {
   if (!elements.has(id)) {
     elements.set(id, {
       id, value: '', textContent: '', innerHTML: '', hidden: true, disabled: false,
-      classList: { add() {}, remove() {}, toggle() {}, contains: () => false },
+      classList: (() => {
+        const set = new Set();
+        return {
+          add: (...c) => c.forEach((x) => set.add(x)),
+          remove: (...c) => c.forEach((x) => set.delete(x)),
+          contains: (c) => set.has(c),
+          toggle: (c, force) => {
+            const on = force === undefined ? !set.has(c) : !!force;
+            if (on) set.add(c); else set.delete(c);
+            return on;
+          },
+        };
+      })(),
       addEventListener() {}, appendChild() {}, removeChild() {}, click() {}, focus() {},
       setAttribute() {}, style: {},
     });
@@ -76,6 +88,7 @@ const NAMES = [
   'SCHEMA_VERSION', 'RUBRIC_VERSION', 'TOOL_VERSION', 'LS_KEY',
   'tierFor', 'computeAll', 'generateDomains', 'init', 'setVal', 'collectState',
   'applyState', 'hasAnyData', 'isPlausibleState', 'schemaGapMessage', 'exportCsv',
+  'hideRestoreBanner',
 ];
 (0, eval)(readText('app.js') + '\n;globalThis.APP = { ' + NAMES.join(', ') + ' };');
 const APP = globalThis.APP;
@@ -311,6 +324,15 @@ const stale = JSON.stringify({
 let boot = bootWith(stale);
 check('a schema-1 autosave shows the restore banner', boot.banner.hidden === false);
 check('a schema-1 autosave warns about Domain 8', boot.message.textContent.includes('Domain 8'));
+check('a schema-1 autosave styles the banner as a warning',
+  boot.banner.classList.contains('banner-warn') && !boot.banner.classList.contains('banner-info'));
+
+// Dismissing must not leave banner-warn on a hidden element.
+APP.hideRestoreBanner();
+check('hideRestoreBanner hides and resets the schema styling',
+  boot.banner.hidden === true
+  && !boot.banner.classList.contains('banner-warn')
+  && boot.banner.classList.contains('banner-info'));
 
 const current = JSON.stringify({
   schema: APP.SCHEMA_VERSION, meta: { protocolId: 'HEM-2026-014' },
@@ -319,6 +341,8 @@ const current = JSON.stringify({
 boot = bootWith(current);
 check('a current-schema autosave shows the plain restore message',
   boot.banner.hidden === false && !boot.message.textContent.includes('Domain 8'));
+check('a current-schema autosave is not styled as a warning',
+  !boot.banner.classList.contains('banner-warn') && boot.banner.classList.contains('banner-info'));
 
 // Before the guard, hasAnyData() threw here and took init() down with it —
 // wireEvents() and update() never ran, leaving a rendered but inert page.
@@ -331,6 +355,45 @@ for (const junk of ['{"hello":"world"}', 'null', 'not json at all', '[]']) {
   check(`malformed autosave (${junk.slice(0, 18)}) shows no restore banner`,
     !threw && boot.banner.hidden === true);
 }
+
+// ─────────────────────────────────────────────────────────────────────────
+// 7. index.html literals that duplicate app.js tables
+//
+// styles.css/app.js share an undeclared contract and so do index.html and the
+// rubric tables: the markup restates numbers the JS owns. The Part A ceiling
+// is now filled from PART_A_MAX at init, but the phase <select> still hardcodes
+// every id and multiplier — and a renamed id is silent, since computeAll()
+// falls back to steady state (x1.0) when the value matches nothing.
+// ─────────────────────────────────────────────────────────────────────────
+section('index.html / app.js consistency');
+
+const html = readText('index.html');
+// Scope to the phase <select> — index.html has other selects (scorer role,
+// score type) whose options are unrelated to PHASE_MULTIPLIERS.
+const phaseSelectHtml = (html.match(/<select id="phaseSelect">([\s\S]*?)<\/select>/) || [])[1] || '';
+check('the phase <select> was found in index.html', phaseSelectHtml.length > 0);
+
+check('the Part A heading has the element init() fills', html.includes('id="partAMaxLabel"'));
+boot = bootWith(null);
+eq('init() fills the Part A ceiling from PART_A_MAX',
+  stubEl('partAMaxLabel').textContent, `(${APP.PART_A_MAX} points)`);
+
+for (const phase of APP.PHASE_MULTIPLIERS) {
+  const optionRe = new RegExp('<option value="' + phase.id + '"[^>]*>([^<]*)</option>');
+  const match = phaseSelectHtml.match(optionRe);
+  check(`phase option "${phase.id}" exists`, !!match);
+  const label = (match || [])[1] || '';
+  check(`phase option "${phase.id}" shows ×${phase.value}`, label.includes('×' + phase.value),
+    'option reads ' + JSON.stringify(label));
+}
+eq('the phase select declares no options beyond PHASE_MULTIPLIERS',
+  (phaseSelectHtml.match(/<option /g) || []).length, APP.PHASE_MULTIPLIERS.length);
+check('the phase select defaults to a real PHASE_MULTIPLIERS id',
+  APP.PHASE_MULTIPLIERS.some((p) => phaseSelectHtml.includes(`value="${p.id}" selected`)));
+
+const dvCeiling = (1 + APP.DATA_VOLUME_FACTOR_RANGE).toFixed(1);
+check(`Part B help text states the x1.0-x${dvCeiling} factor range`,
+  html.includes('×1.0–×' + dvCeiling));
 
 // ─────────────────────────────────────────────────────────────────────────
 

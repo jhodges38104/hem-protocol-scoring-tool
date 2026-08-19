@@ -519,6 +519,17 @@ function showRestoreBanner(schema) {
   banner.hidden = false;
 }
 
+// Resets the schema styling as well as hiding. Nothing re-shows the banner
+// within a session today (showRestoreBanner() runs only from init()), so this
+// is belt-and-braces — but leaving banner-warn on a hidden element is the kind
+// of latent state that bites the moment someone adds a second trigger.
+function hideRestoreBanner() {
+  const banner = $('restoreBanner');
+  banner.hidden = true;
+  banner.classList.remove('banner-warn');
+  banner.classList.add('banner-info');
+}
+
 function loadFromLocalStorage() {
   try {
     const raw = localStorage.getItem(LS_KEY);
@@ -672,10 +683,10 @@ function wireEvents() {
   document.addEventListener('change', onAnyInput);
   document.addEventListener('focusout', onFocusOutClamp);
 
-  $('restoreKeep').addEventListener('click', () => { $('restoreBanner').hidden = true; });
+  $('restoreKeep').addEventListener('click', hideRestoreBanner);
   $('restoreClear').addEventListener('click', () => {
     localStorage.removeItem(LS_KEY);
-    $('restoreBanner').hidden = true;
+    hideRestoreBanner();
     resetFormToDefaults();
     update();
   });
@@ -699,6 +710,13 @@ function wireEvents() {
 
 function init() {
   generateDomains();
+
+  // index.html ships "(116 points)" as a literal so the heading is still right
+  // with JS disabled; this overwrites it from the computed constant so the two
+  // can't drift. It was the last hardcoded copy of the Part A ceiling.
+  const partAMaxLabel = $('partAMaxLabel');
+  if (partAMaxLabel) partAMaxLabel.textContent = `(${PART_A_MAX} points)`;
+
   setVal('metaScoreDate', todayISO());
 
   const saved = loadFromLocalStorage();
