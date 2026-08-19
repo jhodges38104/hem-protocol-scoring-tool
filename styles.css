@@ -86,6 +86,8 @@ h3 { font-size: 1rem; margin: 18px 0 8px; }
   font-size: 0.9rem;
 }
 .banner-info { background: var(--surface-2); border: 1px solid var(--border); color: var(--ink-secondary); }
+/* Used when a restored autosave predates the current schema — see showRestoreBanner(). */
+.banner-warn { background: var(--status-warning-wash); border: 1px solid var(--status-warning); color: var(--ink-primary); }
 .link-btn {
   background: none; border: none; padding: 0; margin: 0;
   color: inherit; text-decoration: underline; cursor: pointer; font: inherit;

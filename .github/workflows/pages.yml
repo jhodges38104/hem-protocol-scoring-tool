@@ -15,7 +15,21 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # Gates the deploy: the rubric's arithmetic invariants (Part A totals 116,
+  # the first seven domains still total 100, tier cutoffs unmoved, a
+  # Domain-8-zero protocol scores identically to v0.1) are things CLAUDE.md
+  # warns will break silently. Runs on Node here; the same file runs under
+  # macOS's bundled jsc locally. No dependencies, so no install step.
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Run invariant tests
+        run: node tests/invariants.js
+
   deploy:
+    needs: test
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

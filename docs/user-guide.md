@@ -25,6 +25,16 @@ This is the longer reference: how to score consistently, how to run the two-scor
 
 **Who's in the room for reconciliation.** The rubric's content-validity step ([Section 6](rubric.md#6-validation-plan)) names CRC, regulatory coordinator, data manager, nurse, PI, and finance as the perspectives that matter. You don't need all of them for routine reconciliation, but if a score is going to justify a staffing conversation, it's worth having more than one role's eyes on it before it's final.
 
+### Scores made before 18 August 2026
+
+The rubric changed on that date. Anything scored before it was scored under v0.1: seven domains, a 100-point Part A, no Domain 8, no data volume factor ([what changed and why](rubric.md#the-rubric-in-full)).
+
+Those scores aren't wrong, and their **tier is still valid** — v0.2 left the cutoffs alone precisely so nothing already scored would be re-tiered. What can be understated is the **Monthly WU**, and specifically for the protocols Domain 8 was added to capture: data-entry-heavy, visit-light work like registries and natural-history cohorts, where v0.1's Domain 5 cap put a ceiling on how much of the real burden could be scored at all.
+
+**Which ones to re-score.** Any protocol where chart/EHR abstraction, diary or PRO collection, coordinating-centre cadence, sub-study layering, or a lifetime follow-up horizon is a genuine part of the work. For a conventional interventional protocol with none of that, the v0.1 figure already stands — scoring 0 on all five Domain 8 items reproduces the v0.1 total, tier, and WU exactly, by design. Re-scoring one of those is harmless but tells you nothing new.
+
+**You don't have to remember which is which.** The tool checks. Import a pre-v0.2 JSON export, or reopen an autosaved entry from before the change, and it says so and names Domain 8. It's a warning, not a block — the score still loads, with those five items at 0 until you fill them in.
+
 ## How to score Part A
 
 Each item gives you three anchors — a description at 0, roughly at the midpoint, and at the max — and a whole-number range. The rubric's own instruction is: *"Anchor descriptors are given for the endpoints; scorers interpolate."* In practice:
@@ -69,7 +79,7 @@ The tool doesn't merge two scorers' entries automatically — reconciliation is 
 
 1. Each scorer opens a fresh copy of the tool (their own browser/session) and scores Part A independently, filling in their own name under Scorer.
 2. Each scorer clicks **Reliability CSV row** and saves the file. (This produces one wide-format row: every item score, domain subtotals, total, tier, and Part B figures — see [Build notes in rubric.md](rubric.md#build-notes) for why this shape.)
-3. Combine both CSVs (append the second scorer's data row under the first's, keeping one header row) — a spreadsheet is enough for two scorers; if you're doing this across many protocols for a formal reliability study, that combined file is the input to the weighted-κ/ICC analysis in [Section 6](rubric.md#6-validation-plan).
+3. Combine both CSVs (append the second scorer's data row under the first's, keeping one header row) — a spreadsheet is enough for two scorers; if you're doing this across many protocols for a formal reliability study, that combined file is the input to the weighted-κ/ICC analysis in [Section 6](rubric.md#6-validation-plan). **Check `rubric_version` before you pool.** Every row carries it (alongside `tool_version`), and a `Draft v0.1` row and a `Draft v0.2` row aren't scored on the same instrument — one has five fewer items and a 100-point ceiling instead of 116. Filter to one version, or segment by it; mixing them silently averages two different scales.
 4. Compare item by item. Where scores match, done. Where they diverge, the two scorers discuss and agree on a final value — or agree they genuinely can't, which is itself worth recording.
 5. One scorer enters the reconciled values into a final copy of the tool, sets Score type appropriately, and that copy's **Print/Save as PDF** and **Export JSON** become the record of the reconciled score. Use Notes to record that it's reconciled and by whom.
 

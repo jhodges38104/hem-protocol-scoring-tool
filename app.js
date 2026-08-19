@@ -15,8 +15,11 @@ const RUBRIC_VERSION = 'Draft v0.2';
 const TOOL_VERSION = '2.0.0';
 const LS_KEY = 'hemProtocolScoringTool.v1';
 // Bumped 1 → 2 because v0.2 added five Domain 8 item ids that a schema-1
-// export won't contain. onImportJsonFile() checks this and warns rather than
-// silently treating a pre-Domain-8 export as a complete v0.2 score.
+// state won't contain. Both paths that can load an older state —
+// onImportJsonFile() and init()'s autosave restore — compare against this and
+// warn rather than silently treating a pre-Domain-8 state as a complete v0.2
+// score. LS_KEY deliberately stays '.v1': bumping it would silently discard a
+// staffer's in-progress entry, trading one quiet failure for another.
 const SCHEMA_VERSION = 2;
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -263,10 +266,29 @@ function applyState(s) {
   setVal('capacityConstant', s.capacityConstant ?? '');
 }
 
+// Accepts only what applyState()/hasAnyData() can actually read, on the same
+// items+meta criteria the import path has always used. Guards both loaders.
+// Without it a malformed payload under LS_KEY reached Object.values(s.meta)
+// in hasAnyData() and threw — and since init() has no try/catch, that aborted
+// before wireEvents()/update() and left a rendered but completely inert page.
+function isPlausibleState(s) {
+  return !!s && typeof s === 'object' && !!s.items && !!s.meta;
+}
+
+// One wording for one hazard, shared by both loaders. applyState() leaves any
+// item id absent from the loaded state at its current value (0 by default), so
+// a pre-v0.2 state scores and tiers as though its five Domain 8 items were
+// genuinely zero — a complete-looking result missing exactly the data-volume
+// burden Domain 8 was added to capture.
+function schemaGapMessage(schema, lead) {
+  return `${lead} was saved under schema ${schema ?? '?'}, which predates Domain 8 — Data Volume, Abstraction & Registry Burden, added in Rubric v0.2. Its five items are set to 0 here. Score them before treating this total or tier as current.`;
+}
+
 function hasAnyData(s) {
-  const metaNonEmpty = Object.values(s.meta).some((v) => String(v || '').trim() !== '');
-  const itemsNonZero = Object.values(s.items).some((v) => Number(v) > 0);
-  const participantsNonZero = Object.values(s.participants).some((v) => Number(v) > 0);
+  const vals = (o) => (o && typeof o === 'object' ? Object.values(o) : []);
+  const metaNonEmpty = vals(s.meta).some((v) => String(v || '').trim() !== '');
+  const itemsNonZero = vals(s.items).some((v) => Number(v) > 0);
+  const participantsNonZero = vals(s.participants).some((v) => Number(v) > 0);
   return metaNonEmpty || itemsNonZero || participantsNonZero;
 }
 
@@ -479,6 +501,24 @@ function saveToLocalStorage(state) {
   try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch (e) { /* private mode / quota — export still works */ }
 }
 
+// The restore path warns on a schema gap exactly as the import path does.
+// This is the path a returning scorer actually hits — reopening the tool
+// restores their last entry automatically — so leaving it unguarded meant the
+// most common way to load a pre-v0.2 score was the only one that said nothing.
+function showRestoreBanner(schema) {
+  const banner = $('restoreBanner');
+  const message = $('restoreMessage');
+  const stale = schema !== SCHEMA_VERSION;
+  if (message) {
+    message.textContent = stale
+      ? schemaGapMessage(schema, "Restored this browser's autosaved entry — it")
+      : 'Restored an unsaved entry from this browser.';
+  }
+  banner.classList.toggle('banner-warn', stale);
+  banner.classList.toggle('banner-info', !stale);
+  banner.hidden = false;
+}
+
 function loadFromLocalStorage() {
   try {
     const raw = localStorage.getItem(LS_KEY);
@@ -573,13 +613,9 @@ function onImportJsonFile(e) {
   reader.onload = () => {
     try {
       const obj = JSON.parse(String(reader.result));
-      if (!obj || typeof obj !== 'object' || !obj.items || !obj.meta) throw new Error('missing items/meta');
+      if (!isPlausibleState(obj)) throw new Error('missing items/meta');
       applyState(obj);
-      if (obj.schema !== SCHEMA_VERSION) {
-        showImportFeedback(`Imported a schema ${obj.schema ?? '?'} export — this predates Domain 8 (Data Volume, Abstraction & Registry Burden, Rubric v0.2). Its five items weren't in that file and are set to 0 here. Score them before treating this total/tier as current.`);
-      } else {
-        showImportFeedback('');
-      }
+      showImportFeedback(obj.schema === SCHEMA_VERSION ? '' : schemaGapMessage(obj.schema, 'The file you imported'));
       update();
     } catch (err) {
       showImportFeedback('Could not import that file — it does not look like a JSON export from this tool.');
@@ -666,9 +702,9 @@ function init() {
   setVal('metaScoreDate', todayISO());
 
   const saved = loadFromLocalStorage();
-  if (saved && hasAnyData(saved)) {
+  if (isPlausibleState(saved) && hasAnyData(saved)) {
     applyState(saved);
-    $('restoreBanner').hidden = false;
+    showRestoreBanner(saved.schema);
   }
 
   wireEvents();

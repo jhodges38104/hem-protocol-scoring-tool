@@ -96,6 +96,26 @@ tool made an explicit choice rather than guessing silently:
 - `styles.css` — layout, light/dark theme, and the print stylesheet.
 - `docs/rubric.md`, `docs/quick-guide.md`, `docs/user-guide.md` — the written
   guides linked above.
+- `tests/invariants.js` — the arithmetic guardrail (see below).
 
 No framework, bundler, or external network calls — deliberately, so this runs
 unmodified on a hospital network and stays auditable by reading three files.
+
+## Tests
+
+```
+node tests/invariants.js
+```
+
+One dependency-free script, no runner and no config — it also runs under the
+`jsc` binary macOS already ships, if you have no Node install:
+`/System/Library/Frameworks/JavaScriptCore.framework/Versions/Current/Helpers/jsc tests/invariants.js`
+
+It loads the real `app.js` against a stub DOM and checks the arithmetic the
+written claims depend on: Part A totals 116, the first seven domains still
+total exactly 100, the tier cutoffs haven't moved, a protocol scoring zero on
+every Domain 8 item scores and costs exactly what it did under v0.1, the data
+volume factor stays in [1.0, 1.3] and touches only participant WU, the
+reliability CSV's header and row stay aligned, and neither loader silently
+accepts a pre-v0.2 state. The Pages workflow gates deployment on it, so a
+change that breaks one of those doesn't reach the live tool.
