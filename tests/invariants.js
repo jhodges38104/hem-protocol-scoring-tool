@@ -88,7 +88,7 @@ const NAMES = [
   'SCHEMA_VERSION', 'RUBRIC_VERSION', 'TOOL_VERSION', 'LS_KEY',
   'tierFor', 'computeAll', 'generateDomains', 'init', 'setVal', 'collectState',
   'applyState', 'hasAnyData', 'isPlausibleState', 'schemaGapMessage', 'exportCsv',
-  'hideRestoreBanner',
+  'hideRestoreBanner', 'generatePhaseOptions', 'DEFAULT_PHASE',
 ];
 (0, eval)(readText('app.js') + '\n;globalThis.APP = { ' + NAMES.join(', ') + ' };');
 const APP = globalThis.APP;
@@ -357,43 +357,75 @@ for (const junk of ['{"hello":"world"}', 'null', 'not json at all', '[]']) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// 7. index.html literals that duplicate app.js tables
+// 7. index.html no longer restates app.js's tables
 //
-// styles.css/app.js share an undeclared contract and so do index.html and the
-// rubric tables: the markup restates numbers the JS owns. The Part A ceiling
-// is now filled from PART_A_MAX at init, but the phase <select> still hardcodes
-// every id and multiplier — and a renamed id is silent, since computeAll()
-// falls back to steady state (x1.0) when the value matches nothing.
+// styles.css/app.js share an undeclared class-name contract. index.html used
+// to share a worse one: the phase <select> restated every PHASE_MULTIPLIERS id
+// and value, and since computeAll() resolves a phase by id and falls back
+// rather than erroring, a renamed id silently costed every protocol at the
+// default rate. The options are generated now, so these assertions check the
+// duplication is gone and stays gone.
 // ─────────────────────────────────────────────────────────────────────────
 section('index.html / app.js consistency');
 
 const html = readText('index.html');
-// Scope to the phase <select> — index.html has other selects (scorer role,
-// score type) whose options are unrelated to PHASE_MULTIPLIERS.
 const phaseSelectHtml = (html.match(/<select id="phaseSelect">([\s\S]*?)<\/select>/) || [])[1] || '';
-check('the phase <select> was found in index.html', phaseSelectHtml.length > 0);
 
-check('the Part A heading has the element init() fills', html.includes('id="partAMaxLabel"'));
+check('the phase <select> is present in index.html', html.includes('id="phaseSelect"'));
+eq('index.html declares no phase options of its own',
+  (phaseSelectHtml.match(/<option/g) || []).length, 0);
+check('index.html states no phase multiplier as a literal',
+  !APP.PHASE_MULTIPLIERS.some((ph) => phaseSelectHtml.includes('×' + ph.value.toFixed(1))));
+
 boot = bootWith(null);
+
+// What init() actually generated into the select.
+const generated = stubEl('phaseSelect').innerHTML;
+eq('one option generated per phase',
+  (generated.match(/<option/g) || []).length, APP.PHASE_MULTIPLIERS.length);
+// The expected option text is spelled out here rather than rebuilt from
+// PHASE_MULTIPLIERS with the same expression app.js uses. Re-deriving it is
+// exactly what let `String(1.0) === '1'` ship "Steady state — ×1" where the
+// markup being replaced read "×1.0": the assertion reproduced the bug and
+// passed. These strings are what the <select> read before it was generated.
+const EXPECTED_OPTIONS = [
+  ['startup', 'Startup (activation −3 mo to first enrollment) — ×1.6'],
+  ['steady', 'Steady state — ×1.0'],
+  ['amendment', 'Substantive amendment month (+ following month) — ×1.3'],
+  ['audit', 'Audit/inspection or monitoring visit month — ×1.4'],
+  ['closeout_qtr', 'Closeout quarter — ×1.2'],
+];
+eq('every phase has an expected-label entry', EXPECTED_OPTIONS.length, APP.PHASE_MULTIPLIERS.length);
+for (const [id, text] of EXPECTED_OPTIONS) {
+  check(`generated option "${id}" reads exactly as the markup it replaced`,
+    generated.includes(`>${text}</option>`), 'generated: ' + JSON.stringify(generated));
+  check(`generated option "${id}" carries its id`, generated.includes(`value="${id}"`));
+}
+check('every multiplier renders with one decimal place',
+  APP.PHASE_MULTIPLIERS.every((ph) => generated.includes('×' + ph.value.toFixed(1))));
+check('DEFAULT_PHASE names a real phase',
+  APP.PHASE_MULTIPLIERS.some((ph) => ph.id === APP.DEFAULT_PHASE));
+eq('exactly one option is preselected', (generated.match(/ selected/g) || []).length, 1);
+check('the preselected option is DEFAULT_PHASE',
+  generated.includes(`value="${APP.DEFAULT_PHASE}" selected`));
+
+// Every generated id must resolve in computeAll() — this is the direction that
+// used to fail silently, costing the protocol at the default multiplier.
+for (const ph of APP.PHASE_MULTIPLIERS) {
+  const c = score({}, { active: 4 }, { phase: ph.id });
+  eq(`phase "${ph.id}" resolves to ×${ph.value}`, c.phase.value, ph.value);
+}
+const fallback = score({}, { active: 4 }, { phase: 'no_such_phase' });
+eq('an unknown phase falls back to DEFAULT_PHASE', fallback.phase.id, APP.DEFAULT_PHASE);
+
+// The other two headings that ship a literal and get overwritten from the constant.
+check('the Part A heading has the element init() fills', html.includes('id="partAMaxLabel"'));
 eq('init() fills the Part A ceiling from PART_A_MAX',
   stubEl('partAMaxLabel').textContent, `(${APP.PART_A_MAX} points)`);
-
-for (const phase of APP.PHASE_MULTIPLIERS) {
-  const optionRe = new RegExp('<option value="' + phase.id + '"[^>]*>([^<]*)</option>');
-  const match = phaseSelectHtml.match(optionRe);
-  check(`phase option "${phase.id}" exists`, !!match);
-  const label = (match || [])[1] || '';
-  check(`phase option "${phase.id}" shows ×${phase.value}`, label.includes('×' + phase.value),
-    'option reads ' + JSON.stringify(label));
-}
-eq('the phase select declares no options beyond PHASE_MULTIPLIERS',
-  (phaseSelectHtml.match(/<option /g) || []).length, APP.PHASE_MULTIPLIERS.length);
-check('the phase select defaults to a real PHASE_MULTIPLIERS id',
-  APP.PHASE_MULTIPLIERS.some((p) => phaseSelectHtml.includes(`value="${p.id}" selected`)));
-
-const dvCeiling = (1 + APP.DATA_VOLUME_FACTOR_RANGE).toFixed(1);
-check(`Part B help text states the x1.0-x${dvCeiling} factor range`,
-  html.includes('×1.0–×' + dvCeiling));
+check('the Part B help text has the element init() fills', html.includes('id="dataVolumeRangeLabel"'));
+eq('init() fills the data volume range from DATA_VOLUME_FACTOR_RANGE',
+  stubEl('dataVolumeRangeLabel').textContent,
+  `×1.0–×${(1 + APP.DATA_VOLUME_FACTOR_RANGE).toFixed(1)}`);
 
 // ─────────────────────────────────────────────────────────────────────────
 

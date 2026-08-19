@@ -152,6 +152,11 @@ const STATUS_ROWS = [
 
 const STATIC_WU = { 1: 2, 2: 4, 3: 8, 4: 14, 5: 22 };
 
+// The phase selected when nothing else is, and the fallback when a loaded state
+// names a phase this build doesn't have. Named once so the <select> default,
+// resetFormToDefaults(), and computeAll()'s fallback can't disagree.
+const DEFAULT_PHASE = 'steady';
+
 // Phase multipliers apply to the protocol TOTAL (static + participant WU), per
 // the source table's caption — not just the participant term. The formula box
 // in the source reads ambiguously (operator precedence vs. the stated intent);
@@ -295,7 +300,7 @@ function hasAnyData(s) {
 function resetFormToDefaults() {
   for (const d of DOMAINS) for (const it of d.items) setVal(`item_${it.id}`, 0);
   for (const r of STATUS_ROWS) setVal(`p_${r.id}`, 0);
-  setVal('phaseSelect', 'steady');
+  setVal('phaseSelect', DEFAULT_PHASE);
   setVal('capacityConstant', '');
   setVal('metaProtocolId', '');
   setVal('metaPiName', '');
@@ -337,7 +342,7 @@ function computeAll() {
   const participantSubtotal = rows.reduce((sum, r) => sum + r.subtotal, 0);
   const staticWU = STATIC_WU[tier.n];
   const preMultiplier = staticWU + participantSubtotal;
-  const phase = PHASE_MULTIPLIERS.find((p) => p.id === s.phase) || PHASE_MULTIPLIERS.find((p) => p.id === 'steady');
+  const phase = PHASE_MULTIPLIERS.find((p) => p.id === s.phase) || PHASE_MULTIPLIERS.find((p) => p.id === DEFAULT_PHASE);
   const monthlyWU = preMultiplier * phase.value;
 
   const C = clampFloatOrNull(s.capacityConstant, 0);
@@ -377,6 +382,21 @@ function generateDomains() {
   $('domainsRoot').innerHTML = parts.join('');
 }
 
+// The phase <select> used to restate all five ids and multipliers as static
+// markup, which meant renaming an id in PHASE_MULTIPLIERS silently costed every
+// protocol at the DEFAULT_PHASE rate — computeAll() resolves the phase by id
+// and falls back rather than erroring. Generating the options from the table
+// removes the possibility: there is now one definition of a phase.
+function generatePhaseOptions() {
+  const el = $('phaseSelect');
+  if (!el) return;
+  el.innerHTML = PHASE_MULTIPLIERS
+    // fmt1, not the raw number: String(1.0) is "1", which would render the
+    // steady-state option as "×1" where the markup it replaces read "×1.0".
+    .map((p) => `<option value="${p.id}"${p.id === DEFAULT_PHASE ? ' selected' : ''}>${p.label} — ×${fmt1(p.value)}</option>`)
+    .join('');
+}
+
 function updateDomainSubtotals(domainScores) {
   for (const ds of domainScores) {
     const el = $(`subtotal_${ds.domain.id}`);
@@ -397,7 +417,7 @@ function renderPartBBreakdown(computed) {
   }
   parts.push(`<tr><td colspan="3">Static WU (Tier ${tier.n})</td><td class="num">${fmt1(staticWU)}</td></tr>`);
   parts.push(`<tr><td colspan="3">Pre-multiplier total</td><td class="num">${fmt1(preMultiplier)}</td></tr>`);
-  parts.push(`<tr><td colspan="3">× Phase multiplier — ${phase.label}</td><td class="num">×${phase.value}</td></tr>`);
+  parts.push(`<tr><td colspan="3">× Phase multiplier — ${phase.label}</td><td class="num">×${fmt1(phase.value)}</td></tr>`);
   parts.push(`<tr class="total-row"><td colspan="3">Monthly Workload Units</td><td class="num"><strong>${fmt1(monthlyWU)}</strong></td></tr>`);
   parts.push(`</tbody></table>`);
   $('partBBreakdown').innerHTML = parts.join('');
@@ -456,14 +476,14 @@ function renderReport(computed) {
   parts.push(`<div class="total-row-block">Total Part A score: <strong>${total} / ${PART_A_MAX}</strong> → ${tierBadgeHTML(tier)}</div>`);
 
   parts.push(`<h3>Part B — monthly workload detail</h3>`);
-  parts.push(`<p class="section-help">Tier ${tier.n} per-participant rates; phase condition: ${phase.label} (×${phase.value}); data volume factor (Domain 8.1+8.2, ${dataVolumeRaw}/${DATA_VOLUME_MAX}): ×${fmt2(dataVolumeFactor)}, applied to participant WU only.</p>`);
+  parts.push(`<p class="section-help">Tier ${tier.n} per-participant rates; phase condition: ${phase.label} (×${fmt1(phase.value)}); data volume factor (Domain 8.1+8.2, ${dataVolumeRaw}/${DATA_VOLUME_MAX}): ×${fmt2(dataVolumeFactor)}, applied to participant WU only.</p>`);
   parts.push(`<table class="wu-table"><thead><tr><th>Status</th><th>Count</th><th>Base WU/participant</th><th>Subtotal (× data volume)</th></tr></thead><tbody>`);
   for (const r of rows) {
     parts.push(`<tr><td>${r.row.label}</td><td class="num">${r.count}</td><td class="num">${fmt1(r.perUnit)}</td><td class="num">${fmt1(r.subtotal)}</td></tr>`);
   }
   parts.push(`<tr><td colspan="3">Static WU (Tier ${tier.n})</td><td class="num">${fmt1(staticWU)}</td></tr>`);
   parts.push(`<tr><td colspan="3">Pre-multiplier total (static + participant)</td><td class="num">${fmt1(preMultiplier)}</td></tr>`);
-  parts.push(`<tr><td colspan="3">× Phase multiplier — ${phase.label}</td><td class="num">×${phase.value}</td></tr>`);
+  parts.push(`<tr><td colspan="3">× Phase multiplier — ${phase.label}</td><td class="num">×${fmt1(phase.value)}</td></tr>`);
   parts.push(`<tr class="total-row"><td colspan="3">Monthly Workload Units</td><td class="num"><strong>${fmt1(monthlyWU)}</strong></td></tr>`);
   parts.push(`</tbody></table>`);
 
@@ -710,12 +730,20 @@ function wireEvents() {
 
 function init() {
   generateDomains();
+  // Before any applyState() below — setting a <select>'s value does nothing if
+  // the matching option hasn't been generated yet, which would drop a restored
+  // or imported phase back to the default.
+  generatePhaseOptions();
 
-  // index.html ships "(116 points)" as a literal so the heading is still right
-  // with JS disabled; this overwrites it from the computed constant so the two
-  // can't drift. It was the last hardcoded copy of the Part A ceiling.
+  // These two headings ship real numbers in index.html so they read correctly
+  // if the script fails, then get overwritten from the constants that own them
+  // so the markup can't drift. They were the last hardcoded copies.
   const partAMaxLabel = $('partAMaxLabel');
   if (partAMaxLabel) partAMaxLabel.textContent = `(${PART_A_MAX} points)`;
+  const dataVolumeRangeLabel = $('dataVolumeRangeLabel');
+  if (dataVolumeRangeLabel) {
+    dataVolumeRangeLabel.textContent = `×1.0–×${(1 + DATA_VOLUME_FACTOR_RANGE).toFixed(1)}`;
+  }
 
   setVal('metaScoreDate', todayISO());
 
