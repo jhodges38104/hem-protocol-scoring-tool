@@ -656,6 +656,65 @@ for (const cardPath of ['docs/quick-reference-card.html', 'docs/laminated-card.h
 }
 
 // ─────────────────────────────────────────────────────────────────────────
+// 12. Text tokens clear WCAG AA against every surface they sit on
+//
+// .item-anchor — the anchor descriptions a rater reads to choose a number —
+// is 12.5px --ink-muted. That token was #898781, which is 3.50:1 on
+// --surface-1: below the 4.5:1 floor for normal text, and below it only on
+// screen, since @media print already redefined it darker. Contrast is exactly
+// the kind of thing that regresses silently during a palette tweak, so the
+// floor is asserted rather than remembered.
+// ─────────────────────────────────────────────────────────────────────────
+section('Colour contrast (WCAG AA, 4.5:1)');
+
+const css = readText('styles.css');
+
+function tokensIn(block) {
+  const out = {};
+  for (const m of block.matchAll(/--([a-z0-9-]+):\s*(#[0-9a-fA-F]{6})\b/g)) out[m[1]] = m[2];
+  return out;
+}
+function rootBlockAt(from) {
+  const start = css.indexOf(':root {', from);
+  return start === -1 ? '' : css.slice(start, css.indexOf('}', start));
+}
+function relativeLuminance(hex) {
+  const chan = (i) => {
+    const c = parseInt(hex.slice(1 + i * 2, 3 + i * 2), 16) / 255;
+    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  };
+  return 0.2126 * chan(0) + 0.7152 * chan(1) + 0.0722 * chan(2);
+}
+function contrast(a, b) {
+  const [hi, lo] = [relativeLuminance(a), relativeLuminance(b)].sort((x, y) => y - x);
+  return (hi + 0.05) / (lo + 0.05);
+}
+
+// Sanity-check the maths against two known pairs before trusting it on tokens.
+close('contrast(#000,#fff) is 21', Math.round(contrast('#000000', '#ffffff')), 21);
+close('contrast(#ffffff,#ffffff) is 1', contrast('#ffffff', '#ffffff'), 1);
+
+const light = tokensIn(rootBlockAt(0));
+const dark = { ...light, ...tokensIn(rootBlockAt(css.indexOf('@media (prefers-color-scheme: dark)'))) };
+// Not `print`: that's jsc's global, and the log fallback above references it.
+const printPalette = { ...light, ...tokensIn(rootBlockAt(css.indexOf('@media print'))) };
+
+const INKS = ['ink-primary', 'ink-secondary', 'ink-muted'];
+const SURFACES = ['surface-1', 'surface-2', 'page-bg'];
+
+for (const [palette, tokens] of [['light', light], ['dark', dark], ['print', printPalette]]) {
+  check(`${palette}: every ink and surface token is defined`,
+    INKS.concat(SURFACES).every((t) => /^#[0-9a-fA-F]{6}$/.test(tokens[t] || '')));
+  for (const ink of INKS) {
+    for (const surface of SURFACES) {
+      const r = contrast(tokens[ink], tokens[surface]);
+      check(`${palette}: --${ink} on --${surface} clears 4.5:1`,
+        r >= 4.5, `${tokens[ink]} on ${tokens[surface]} is ${r.toFixed(2)}:1`);
+    }
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────
 
 section('');
 if (failures.length) {

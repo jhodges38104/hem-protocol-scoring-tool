@@ -9,7 +9,11 @@
   --page-bg: #f9f9f7;
   --ink-primary: #0b0b0b;
   --ink-secondary: #52514e;
-  --ink-muted: #898781;
+  /* 4.5:1 on every surface above. .item-anchor carries the scoring anchors a
+     rater reads to pick a number, at 12.5px, so this token has to clear AA:
+     it was #898781 (3.50:1) on screen while @media print already used this
+     value. The palettes agree now; invariants section 12 holds them there. */
+  --ink-muted: #6b6a65;
   --gridline: #e1e0d9;
   --border: rgba(11, 11, 11, 0.10);
   --status-warning: #fab219;
