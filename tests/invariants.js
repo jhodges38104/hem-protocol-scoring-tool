@@ -76,7 +76,11 @@ globalThis.localStorage = {
 };
 globalThis.Blob = function Blob(parts) { lastBlobText = parts.join(''); };
 globalThis.URL = { createObjectURL: () => 'blob:stub', revokeObjectURL() {} };
-globalThis.FileReader = function FileReader() {};
+// Functional enough to drive the real onImportJsonFile(): it assigns onload
+// before calling readAsText, so firing synchronously is faithful here.
+globalThis.FileReader = function FileReader() {
+  this.readAsText = (file) => { this.result = file.text; if (this.onload) this.onload(); };
+};
 if (typeof setTimeout !== 'function') globalThis.setTimeout = () => 0;
 
 // Indirect eval runs in global scope, so app.js's top-level declarations are
@@ -89,7 +93,7 @@ const NAMES = [
   'tierFor', 'computeAll', 'generateDomains', 'init', 'setVal', 'collectState',
   'applyState', 'hasAnyData', 'isPlausibleState', 'schemaGapMessage', 'exportCsv',
   'hideRestoreBanner', 'generatePhaseOptions', 'DEFAULT_PHASE',
-  'update', 'AUTOFILLED_META_KEYS',
+  'onImportJsonFile', 'resetFormToDefaults', 'update', 'AUTOFILLED_META_KEYS',
 ];
 (0, eval)(readText('app.js') + '\n;globalThis.APP = { ' + NAMES.join(', ') + ' };');
 const APP = globalThis.APP;
@@ -476,6 +480,71 @@ APP.update();
 boot = bootWith(lsStore[APP.LS_KEY]);
 check('a visit that did enter something still restores and banners',
   boot.banner.hidden === false);
+
+// ─────────────────────────────────────────────────────────────────────────
+// 9. Import replaces the form, it does not merge into it
+//
+// applyState() only writes the ids the loaded state actually contains, so
+// importing onto a form that already has entries used to fold two protocols
+// into one score — while the button label said "overwrites current form" and
+// the schema-gap warning said the five Domain 8 items were "set to 0 here".
+// onImportJsonFile() now resets first, which is what makes both true.
+// ─────────────────────────────────────────────────────────────────────────
+section('Import replaces the form');
+
+function importFile(text) {
+  APP.onImportJsonFile({ target: { files: [{ text }], value: 'chosen.json' } });
+  return stubEl('importFeedback').textContent;
+}
+
+elements = new Map();
+lsStore = {};
+APP.init();
+// A scorer part-way through a v0.2 score, Domain 8 fully entered.
+for (const it of APP.DOMAINS[7].items) APP.setVal('item_' + it.id, it.max);
+APP.setVal('metaProtocolId', 'HEM-2026-999');
+eq('setup: Domain 8 is fully scored before the import',
+  APP.computeAll().domainScores[7].capped, APP.DOMAINS[7].max);
+
+// A pre-v0.2 export: it names no Domain 8 item at all.
+const legacyFeedback = importFile(JSON.stringify({
+  schema: 1, meta: { protocolId: 'HEM-2025-001' },
+  items: { reg_status: 5, sponsor_type: 3 }, participants: { active: 5 },
+}));
+const imported = APP.computeAll();
+
+eq('Domain 8 is cleared by an import that never mentions it',
+  imported.domainScores[7].capped, 0);
+close('the data volume factor drops back to 1.0', imported.dataVolumeFactor, 1);
+eq('the total is exactly what the imported file describes', imported.total, 8);
+eq('the imported protocol id replaces the one on the form',
+  imported.state.meta.protocolId, 'HEM-2025-001');
+check('the schema gap is still reported', legacyFeedback.includes('Domain 8'));
+check('the warning\'s claim that the five items are 0 is now true',
+  APP.DOMAINS[7].items.every((it) => Number(APP.collectState().items[it.id]) === 0));
+
+const currentFeedback = importFile(JSON.stringify({
+  schema: APP.SCHEMA_VERSION, meta: { protocolId: 'HEM-2026-014' },
+  items: { chart_abstraction: 4 }, participants: {},
+}));
+eq('a current-schema import reports nothing', currentFeedback, '');
+eq('a current-schema import applies its own values and only its own',
+  APP.computeAll().total, 4);
+
+// The reset sits after the parse and the plausibility check on purpose: a file
+// that fails either must not cost the scorer the entry already on the form.
+elements = new Map();
+lsStore = {};
+APP.init();
+APP.setVal('item_reg_status', 5);
+const junkFeedback = importFile('not json at all');
+eq('a failed import leaves the form untouched', APP.computeAll().total, 5);
+check('a failed import still explains itself',
+  junkFeedback.includes('does not look like'));
+const implausibleFeedback = importFile('{"hello":"world"}');
+eq('an implausible import also leaves the form untouched', APP.computeAll().total, 5);
+check('an implausible import explains itself too',
+  implausibleFeedback.includes('does not look like'));
 
 // ─────────────────────────────────────────────────────────────────────────
 

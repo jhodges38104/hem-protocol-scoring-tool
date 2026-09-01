@@ -662,6 +662,14 @@ function onImportJsonFile(e) {
     try {
       const obj = JSON.parse(String(reader.result));
       if (!isPlausibleState(obj)) throw new Error('missing items/meta');
+      // Reset first: applyState() only writes the ids the file actually
+      // contains, so importing onto a form that already has entries merges the
+      // two protocols instead of replacing one with the other. That made the
+      // button's own label ("overwrites current form") and the schema-gap
+      // warning ("its five items are set to 0 here") both untrue — a pre-v0.2
+      // file imported over a scored form kept the previous protocol's Domain 8
+      // values and folded them into the new total.
+      resetFormToDefaults();
       applyState(obj);
       showImportFeedback(obj.schema === SCHEMA_VERSION ? '' : schemaGapMessage(obj.schema, 'The file you imported'));
       update();
