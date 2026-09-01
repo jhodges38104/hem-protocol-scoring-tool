@@ -600,6 +600,62 @@ eq('the CSV clamps to the same ceiling',
   String(APP.PARTICIPANT_MAX));
 
 // ─────────────────────────────────────────────────────────────────────────
+// 11. The printable cards still say what the tool scores
+//
+// README calls these "generated from app.js's DOMAINS/TIERS/etc. tables rather
+// than hand-transcribed" — true of how they were produced, but they are
+// checked in as static HTML with every number as a literal, and there is no
+// generator to re-run. Nothing but this section makes the second half of that
+// sentence true. A laminated card is what a scorer has in front of them when
+// the screen doesn't; one that has gone stale is a wrong score, not a typo.
+// ─────────────────────────────────────────────────────────────────────────
+section('Printable cards match the tables');
+
+// Domain-major item numbering, 1.1 … 8.5, as the cards print it.
+const ITEM_NUMBERS = APP.DOMAINS.flatMap((d, di) => d.items.map((it, ii) => `${di + 1}.${ii + 1}`));
+
+for (const cardPath of ['docs/quick-reference-card.html', 'docs/laminated-card.html']) {
+  const card = readText(cardPath);
+  const name = cardPath.replace('docs/', '');
+  // The cards escape & as &amp;; compare against both spellings.
+  const esc = (t) => String(t).replace(/&/g, '&amp;');
+  const has = (t) => card.includes(t) || card.includes(esc(t));
+  const cardRows = card.match(/<tr[\s\S]*?<\/tr>/g) || [];
+  const rowFor = (label) => cardRows.find((r) => r.includes(label) || r.includes(esc(label)));
+
+  eq(`${name}: one numbered row per item, in table order`,
+    (card.match(/class="itemno">([\d.]+)</g) || []).map((m) => m.replace(/\D*([\d.]+)</, '$1')).join(','),
+    ITEM_NUMBERS.join(','));
+
+  for (const d of APP.DOMAINS) {
+    check(`${name}: states "${d.title}"`, has(d.title));
+    check(`${name}: states domain ${d.id}'s range as 0–${d.max}`,
+      new RegExp('\\(0[–-]' + d.max + '\\)').test(card));
+    for (const it of d.items) {
+      const row = rowFor(it.label);
+      check(`${name}: has a row for "${it.label}"`, !!row);
+      check(`${name}: "${it.label}" is scored 0–${it.max}`,
+        !!row && new RegExp('0[–-]' + it.max + '(?!\\d)').test(row));
+    }
+  }
+
+  check(`${name}: states the Part A ceiling ${APP.PART_A_MAX}`, has(String(APP.PART_A_MAX)));
+  for (const t of APP.TIERS) {
+    check(`${name}: names tier ${t.n} "${t.label}"`, has(t.label));
+    check(`${name}: states tier ${t.n}'s Static WU (${APP.STATIC_WU[t.n]})`,
+      new RegExp('\\b' + APP.STATIC_WU[t.n] + '\\b').test(card));
+  }
+  for (const r of APP.STATUS_ROWS) check(`${name}: lists the "${r.label}" status row`, has(r.label));
+  for (const ph of APP.PHASE_MULTIPLIERS) {
+    check(`${name}: states the ${ph.id} multiplier as ×${ph.value.toFixed(1)}`,
+      card.includes(ph.value.toFixed(1)));
+  }
+  check(`${name}: states the data volume factor's ceiling`,
+    card.includes((1 + APP.DATA_VOLUME_FACTOR_RANGE).toFixed(1)));
+  check(`${name}: names the rubric version it was cut from`, has(APP.RUBRIC_VERSION.replace('Draft ', '')));
+}
+
+// ─────────────────────────────────────────────────────────────────────────
 
 section('');
 if (failures.length) {
