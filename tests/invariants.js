@@ -89,6 +89,7 @@ const NAMES = [
   'tierFor', 'computeAll', 'generateDomains', 'init', 'setVal', 'collectState',
   'applyState', 'hasAnyData', 'isPlausibleState', 'schemaGapMessage', 'exportCsv',
   'hideRestoreBanner', 'generatePhaseOptions', 'DEFAULT_PHASE',
+  'update', 'AUTOFILLED_META_KEYS',
 ];
 (0, eval)(readText('app.js') + '\n;globalThis.APP = { ' + NAMES.join(', ') + ' };');
 const APP = globalThis.APP;
@@ -426,6 +427,55 @@ check('the Part B help text has the element init() fills', html.includes('id="da
 eq('init() fills the data volume range from DATA_VOLUME_FACTOR_RANGE',
   stubEl('dataVolumeRangeLabel').textContent,
   `×1.0–×${(1 + APP.DATA_VOLUME_FACTOR_RANGE).toFixed(1)}`);
+
+// ─────────────────────────────────────────────────────────────────────────
+// 8. A form nobody has touched is not "data"
+//
+// init() writes today's score date and the score-type <select> ships a
+// default, so meta is never entirely empty. While hasAnyData() counted those,
+// a virgin form reported data and both of its callers misfired: the
+// destructive-action confirms armed with nothing to lose, and init()'s own
+// autosave of the blank default state came back as a "restored entry" on the
+// next load. The banner that fired is the one that also carries the schema-gap
+// warning — the reason a false positive on every visit is not cosmetic.
+// ─────────────────────────────────────────────────────────────────────────
+section('A virgin form is not data');
+
+boot = bootWith(null);
+const virgin = APP.collectState();
+check('init() still fills the score date on a virgin form',
+  /^\d{4}-\d{2}-\d{2}$/.test(String(virgin.meta.scoreDate)));
+check('a virgin form does not count as data', !APP.hasAnyData(virgin));
+check('hasAnyData ignores every autofilled meta key even when populated',
+  !APP.hasAnyData({ meta: Object.fromEntries(APP.AUTOFILLED_META_KEYS.map((k) => [k, 'set'])), items: {}, participants: {} }));
+
+// The other direction: anything the scorer can actually type must still count.
+check('a typed meta field still counts as data',
+  APP.hasAnyData({ meta: { protocolId: 'HEM-2026-014' }, items: {}, participants: {} }));
+check('a scored item still counts as data',
+  APP.hasAnyData({ meta: {}, items: { reg_status: '3' }, participants: {} }));
+check('a participant count still counts as data',
+  APP.hasAnyData({ meta: {}, items: {}, participants: { active: '5' } }));
+
+// The regression itself, end to end: open the tool with nothing saved, type
+// nothing, then open it again against whatever that first visit autosaved.
+elements = new Map();
+lsStore = {};
+APP.init();
+const virginAutosave = lsStore[APP.LS_KEY];
+check('a virgin visit still autosaves', !!virginAutosave);
+boot = bootWith(virginAutosave);
+check('the next visit shows no restore banner for an untouched form',
+  boot.banner.hidden === true);
+
+elements = new Map();
+lsStore = {};
+APP.init();
+APP.setVal('metaProtocolId', 'HEM-2026-014');
+APP.update();
+boot = bootWith(lsStore[APP.LS_KEY]);
+check('a visit that did enter something still restores and banners',
+  boot.banner.hidden === false);
 
 // ─────────────────────────────────────────────────────────────────────────
 

@@ -289,9 +289,26 @@ function schemaGapMessage(schema, lead) {
   return `${lead} was saved under schema ${schema ?? '?'}, which predates Domain 8 — Data Volume, Abstraction & Registry Burden, added in Rubric v0.2. Its five items are set to 0 here. Score them before treating this total or tier as current.`;
 }
 
+// Meta fields the tool fills in by itself: init()/resetFormToDefaults() write
+// today's date, and the score-type <select> ships a default. They therefore
+// carry a value on a form nobody has touched, and can never distinguish a real
+// entry from a blank one — so hasAnyData() must not count them.
+//
+// Counting them meant every virgin form reported data, which broke both of
+// hasAnyData()'s callers at once: wireArmedButton()'s two-click confirm armed
+// when there was nothing to lose, and — worse — init()'s autosave of the blank
+// default state looked like a real entry, so the restore banner fired on every
+// visit after the first. That banner is also what carries the schema-gap
+// warning, and a banner that cries wolf on every load is one scorers learn to
+// dismiss without reading.
+const AUTOFILLED_META_KEYS = ['scoreDate', 'scoreType'];
+
 function hasAnyData(s) {
   const vals = (o) => (o && typeof o === 'object' ? Object.values(o) : []);
-  const metaNonEmpty = vals(s.meta).some((v) => String(v || '').trim() !== '');
+  const typedMeta = (o) => (o && typeof o === 'object'
+    ? Object.entries(o).filter(([k]) => !AUTOFILLED_META_KEYS.includes(k)).map(([, v]) => v)
+    : []);
+  const metaNonEmpty = typedMeta(s.meta).some((v) => String(v || '').trim() !== '');
   const itemsNonZero = vals(s.items).some((v) => Number(v) > 0);
   const participantsNonZero = vals(s.participants).some((v) => Number(v) > 0);
   return metaNonEmpty || itemsNonZero || participantsNonZero;
