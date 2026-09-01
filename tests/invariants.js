@@ -94,7 +94,7 @@ const NAMES = [
   'applyState', 'hasAnyData', 'isPlausibleState', 'schemaGapMessage', 'exportCsv',
   'hideRestoreBanner', 'generatePhaseOptions', 'DEFAULT_PHASE',
   'onImportJsonFile', 'resetFormToDefaults', 'update', 'AUTOFILLED_META_KEYS',
-  'PARTICIPANT_MAX', 'generateParticipantInputs', 'resolvePhase',
+  'PARTICIPANT_MAX', 'generateParticipantInputs', 'resolvePhase', 'csvEscape',
   'capacityIsImplausible', 'repeatedParticipantCounts', 'renderReport',
   'renderPartBBreakdown', 'renderFteReadout',
 ];
@@ -848,6 +848,59 @@ check('the live FTE readout carries the capacity warning',
 APP.renderFteReadout(capacityOk);
 check('a plausible C leaves the live FTE readout unwarned',
   !stubEl('fteReadout').innerHTML.includes('before a single participant is enrolled'));
+
+// ─────────────────────────────────────────────────────────────────────────
+// 15. The reliability CSV can't hand a spreadsheet a formula
+//
+// The whole point of this export is that rows from several scorers get pooled
+// and opened in a spreadsheet. A field beginning =, +, -, @, tab or CR is
+// evaluated there, and quoting doesn't prevent it — the parser strips the
+// quotes first. csvEscape() prefixes an apostrophe so the cell reads as text.
+// ─────────────────────────────────────────────────────────────────────────
+section('Reliability CSV: formula injection');
+
+for (const lead of ['=', '+', '-', '@', '\t', '\r']) {
+  eq(`csvEscape neutralises a leading ${JSON.stringify(lead)}`,
+    APP.csvEscape(lead + 'SUM(A1:A9)').replace(/^"|"$/g, ''), "'" + lead + 'SUM(A1:A9)');
+}
+eq('ordinary text is untouched', APP.csvEscape('HEM-2026-014'), 'HEM-2026-014');
+eq('a dash inside a value is not a leading dash', APP.csvEscape('a-b'), 'a-b');
+eq('quoting still applies on top of the prefix', APP.csvEscape('=a,b'), '"\'=a,b"');
+eq('embedded quotes are still doubled', APP.csvEscape('say "hi"'), '"say ""hi"""');
+eq('a newline still forces quoting', APP.csvEscape('one\ntwo'), '"one\ntwo"');
+
+// End to end, through the real export: a scorer types these into the form.
+elements = new Map();
+lsStore = {};
+APP.init();
+APP.setVal('metaProtocolId', '=1+1');
+APP.setVal('metaScorerName', '+SUM(A1:A9)');
+APP.setVal('metaNotes', '@ref');
+APP.exportCsv();
+const injLines = lastBlobText.trim().split('\r\n');
+const injHeader = parseCsvLine(injLines[0]);
+const injRow = parseCsvLine(injLines[1]);
+const cell = (name) => injRow[injHeader.indexOf(name)];
+eq('the exported protocol id is inert', cell('protocol_id'), "'=1+1");
+eq('the exported scorer name is inert', cell('scorer_name'), "'+SUM(A1:A9)");
+eq('the exported notes field is inert', cell('notes'), "'@ref");
+eq('the header row is unaffected', injHeader[0], 'export_datetime');
+
+// The comment above csvEscape() claims no numeric column can lead with one of
+// these characters. Hold it here: a future negative-valued column would start
+// picking up an apostrophe silently. Fresh form first — score() only writes
+// items and participants, so the injected meta above would otherwise persist.
+elements = new Map();
+lsStore = {};
+APP.init();
+score({ [dvIds[0]]: 2 }, parts, { capacity: 120 });
+APP.exportCsv();
+const cleanLines = lastBlobText.trim().split('\r\n');
+const cleanHeader = parseCsvLine(cleanLines[0]);
+const cleanRow = parseCsvLine(cleanLines[1]);
+check('no column of a normally-filled export needs neutralising',
+  cleanRow.every((v) => !/^'/.test(v)),
+  'neutralised: ' + cleanHeader.filter((_, i) => /^'/.test(cleanRow[i])).join(', '));
 
 // ─────────────────────────────────────────────────────────────────────────
 

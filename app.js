@@ -705,9 +705,25 @@ function exportJson() {
   downloadBlob(blob, filenameFor(state, 'json'));
 }
 
+// Excel, Sheets and Numbers evaluate a cell whose text begins with =, +, -,
+// @, tab or CR as a formula, and quoting does not stop it — the parser strips
+// the quotes first, so "=1+1" is still a formula. This file exists to be
+// pooled across scorers and opened in a spreadsheet, which is exactly the
+// path that turns a typed protocol id into something executed rather than
+// read. An apostrophe prefix is the standard mitigation: the spreadsheet
+// treats the remainder as literal text.
+//
+// It can only ever fire on the free-text columns (protocol id, PI, scorer,
+// notes). Every numeric column comes from clampInt()/fmt1()/fmt2() and is
+// non-negative, so none of them can lead with one of these characters —
+// asserted in the tests, since a future negative-valued column would start
+// picking up an apostrophe silently.
+const CSV_FORMULA_LEAD = /^[=+\-@\t\r]/;
+
 function csvEscape(v) {
   const s = String(v ?? '');
-  return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  const safe = CSV_FORMULA_LEAD.test(s) ? "'" + s : s;
+  return /[",\n]/.test(safe) ? '"' + safe.replace(/"/g, '""') + '"' : safe;
 }
 
 function exportCsv() {
