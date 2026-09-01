@@ -65,6 +65,8 @@ Part B asks how many participants are currently in each of five statuses. These 
 - **Long-term follow-up (annual contact)** — the low-intensity, often annual-contact tail (this is where gene therapy LTFU obligations live).
 - **Closed to accrual, data cleaning/closeout** — no more visits, but the record isn't finalized.
 
+**The five statuses are mutually exclusive: count each participant once, in the one status they are in this month — not once per status they have ever passed through.** A 250-participant cohort in long-term follow-up is 250 in the LTFU row and 0 in the others, not 250 in three rows. Entering total enrollment in every row multiplies the participant term several times over, and because the rows carry different rates it doesn't inflate cleanly — it distorts the mix as well as the size. The tool shows a headcount total under the Part B table for exactly this reason; if it reads higher than the number of people on the study, a row is being counted twice. It also warns when the same non-zero count lands in three or more rows.
+
 If a specific participant doesn't cleanly fit one bucket, use judgment and be consistent protocol-to-protocol and month-to-month — the exact edge case matters less than scoring it the same way next month.
 
 **Data volume factor (v0.2).** You don't enter anything extra for this — it's computed automatically from two Domain 8 items you already scored in Part A (chart/EHR abstraction, diary/PRO frequency) and shown above the participant table as a ×1.0–×1.3 multiplier. It scales participant WU only, not Static WU. If it looks wrong, the fix is to revisit those two Domain 8 item scores, not to look for a separate Part B input.

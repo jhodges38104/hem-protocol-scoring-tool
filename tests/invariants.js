@@ -95,6 +95,8 @@ const NAMES = [
   'hideRestoreBanner', 'generatePhaseOptions', 'DEFAULT_PHASE',
   'onImportJsonFile', 'resetFormToDefaults', 'update', 'AUTOFILLED_META_KEYS',
   'PARTICIPANT_MAX', 'generateParticipantInputs', 'resolvePhase', 'csvEscape',
+  'capacityIsImplausible', 'repeatedParticipantCounts', 'renderReport',
+  'renderPartBBreakdown', 'renderFteReadout',
 ];
 (0, eval)(readText('app.js') + '\n;globalThis.APP = { ' + NAMES.join(', ') + ' };');
 const APP = globalThis.APP;
@@ -754,7 +756,101 @@ eq('a known phase is applied unchanged', APP.collectState().phase, 'audit');
 close('a known phase still costs its own multiplier', APP.computeAll().phase.value, 1.4);
 
 // ─────────────────────────────────────────────────────────────────────────
-// 14. The reliability CSV can't hand a spreadsheet a formula
+// 14. Input plausibility guards
+//
+// These are advisory, not arithmetic. The first assertion is the one that
+// matters most: a guard that fired and quietly moved a number would be worse
+// than the silence it replaced.
+// ─────────────────────────────────────────────────────────────────────────
+section('Input plausibility guards');
+
+// A protocol that trips both guards, and the same protocol scored clean.
+const tripped = score({ reg_status: 5, site_role: 5, oversight_bodies: 3 },
+  { active: 40, follow_up: 40, ltfu: 40 }, { capacity: 1 });
+// Same protocol, same participant entry — only C differs, so this one still
+// trips the participant guard. It isolates the capacity guard, nothing more.
+const capacityOk = score({ reg_status: 5, site_role: 5, oversight_bodies: 3 },
+  { active: 40, follow_up: 40, ltfu: 40 }, { capacity: 200 });
+
+close('a fired guard does not change Monthly WU', tripped.monthlyWU, capacityOk.monthlyWU);
+close('a fired guard does not change Part A', tripped.total, capacityOk.total);
+close('FTE is still WU ÷ C when the capacity guard fires', tripped.fte, tripped.monthlyWU / 1);
+
+// Capacity guard: the boundary is the protocol's own Static WU.
+for (const t of APP.TIERS) {
+  const staticWU = APP.STATIC_WU[t.n];
+  check(`tier ${t.n}: C just below Static WU (${staticWU}) is implausible`,
+    APP.capacityIsImplausible(staticWU - 0.5, staticWU) === true);
+  check(`tier ${t.n}: C equal to Static WU is not flagged`,
+    APP.capacityIsImplausible(staticWU, staticWU) === false);
+  check(`tier ${t.n}: a plausible C is not flagged`,
+    APP.capacityIsImplausible(staticWU * 10, staticWU) === false);
+}
+check('a blank capacity constant is not flagged', APP.capacityIsImplausible(null, 8) === false);
+check('C = 0 is not flagged (FTE is not computed at all)', APP.capacityIsImplausible(0, 8) === false);
+
+// Every capacity constant used in the first nine-protocol test batch was
+// below its protocol's Static WU. If a future edit stops catching these, the
+// guard has stopped doing the job it was added for.
+const BATCH = [
+  { name: 'CITUSCD', tier: 3, C: 1 }, { name: 'GRNDAD', tier: 2, C: 0.5 },
+  { name: 'REALANSWRS', tier: 3, C: 1 }, { name: 'RHEMEDY', tier: 4, C: 1 },
+  { name: 'SAGES1', tier: 5, C: 1 }, { name: 'SCCRIP', tier: 4, C: 3 },
+  { name: 'SCDICII', tier: 3, C: 1.5 }, { name: 'SPARKLE', tier: 3, C: 1 },
+  { name: 'WeDecide', tier: 2, C: 0.5 },
+];
+for (const b of BATCH) {
+  check(`${b.name}'s C=${b.C} is flagged at tier ${b.tier}`,
+    APP.capacityIsImplausible(b.C, APP.STATIC_WU[b.tier]) === true);
+}
+
+// Participant guard: three rows sharing a count, not two.
+const rowsOf = (counts) => APP.STATUS_ROWS.map((r) => ({ row: r, count: counts[r.id] || 0 }));
+eq('three rows sharing a count is flagged',
+  APP.repeatedParticipantCounts(rowsOf({ active: 152, follow_up: 152, ltfu: 152 })).length, 1);
+eq('two rows sharing a count is not flagged',
+  APP.repeatedParticipantCounts(rowsOf({ follow_up: 6, ltfu: 6 })).length, 0);
+eq('zeros are not a shared count',
+  APP.repeatedParticipantCounts(rowsOf({ active: 3 })).length, 0);
+eq('distinct counts are not flagged',
+  APP.repeatedParticipantCounts(rowsOf({ screening: 3, active: 4, follow_up: 6, ltfu: 5 })).length, 0);
+const flagged = APP.repeatedParticipantCounts(rowsOf({ active: 152, follow_up: 152, ltfu: 152 }))[0];
+eq('the flag reports the repeated count', flagged.count, 152);
+eq('the flag names every row it appears in', flagged.labels.length, 3);
+
+// Headcount readout sums the five statuses as entered, without deduplication —
+// that is the point: it is what makes a triple-counted cohort visible.
+const counted = score({}, { screening: 145, active: 1876, follow_up: 1876, ltfu: 1876, closeout: 139 });
+eq('participantTotal sums the five rows as entered', counted.participantTotal, 5912);
+
+// The printed report is the artifact that leaves the building. A warning that
+// rendered only in the live panel would not have stopped the test batch.
+APP.renderReport(tripped);
+const reportHTML = stubEl('report').innerHTML;
+check('the report carries the capacity warning', reportHTML.includes('before a single participant is enrolled'));
+check('the report carries the participant warning', reportHTML.includes('mutually exclusive'));
+check('the report carries the headcount readout', reportHTML.includes('Participants counted across all five statuses'));
+APP.renderReport(capacityOk);
+const capacityOkHTML = stubEl('report').innerHTML;
+check('a plausible C renders no capacity warning', !capacityOkHTML.includes('before a single participant is enrolled'));
+check('the headcount readout is unconditional', capacityOkHTML.includes('Participants counted across all five statuses'));
+
+// The live panel is a second render path over the same verdicts. It warns in
+// the two places a scorer actually looks while entering: under the Part B
+// table, and under the FTE figure itself.
+APP.renderPartBBreakdown(tripped);
+const panelHTML = stubEl('partBBreakdown').innerHTML;
+check('the live Part B panel carries the headcount readout', panelHTML.includes('Participants counted across all five statuses'));
+check('the live Part B panel carries the participant warning', panelHTML.includes('mutually exclusive'));
+APP.renderFteReadout(tripped);
+check('the live FTE readout carries the capacity warning',
+  stubEl('fteReadout').innerHTML.includes('before a single participant is enrolled'));
+APP.renderFteReadout(capacityOk);
+check('a plausible C leaves the live FTE readout unwarned',
+  !stubEl('fteReadout').innerHTML.includes('before a single participant is enrolled'));
+
+// ─────────────────────────────────────────────────────────────────────────
+// 15. The reliability CSV can't hand a spreadsheet a formula
 //
 // The whole point of this export is that rows from several scorers get pooled
 // and opened in a spreadsheet. A field beginning =, +, -, @, tab or CR is

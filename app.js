@@ -353,6 +353,41 @@ function resetFormToDefaults() {
 // Computation
 // ─────────────────────────────────────────────────────────────────────────
 
+// Input plausibility guards. Neither is a rubric number, neither blocks
+// anything, and neither changes the arithmetic — Part B computes the same
+// either way. They exist because a nine-protocol test batch shipped nine
+// reports whose FTE figures were meaningless and three whose participant
+// counts were entered three times over, and nothing in the output said so.
+// Both tests are derived from this tool's own tables rather than from an
+// external ratio, which docs/rubric.md explicitly warns against importing.
+
+// Static WU accrues with nobody enrolled, so a capacity constant below this
+// protocol's own Static WU means the protocol consumes more than 1.0 FTE
+// before it has enrolled anyone — definitionally impossible for a constant
+// that means "WU one 1.0 FTE coordinator sustains per month". Catches the
+// placeholder entries (C = 1, C = 0.5) that make FTE equal to WU.
+function capacityIsImplausible(C, staticWU) {
+  return C != null && C > 0 && C < staticWU;
+}
+
+// The five statuses are mutually exclusive — each participant is in exactly
+// one of them this month (docs/user-guide.md, "How to score Part B"). The
+// same non-zero count landing in three or more rows is the signature of
+// entering total enrollment in every row instead, which multiplies the
+// participant term. Two rows matching is deliberately left alone: small
+// cohorts collide by chance (1 in follow-up and 1 in LTFU is two different
+// people), and the headcount readout covers that case without nagging.
+function repeatedParticipantCounts(rows) {
+  const byCount = {};
+  for (const r of rows) {
+    if (r.count <= 0) continue;
+    (byCount[r.count] = byCount[r.count] || []).push(r.row.label);
+  }
+  return Object.keys(byCount)
+    .filter((k) => byCount[k].length >= 3)
+    .map((k) => ({ count: Number(k), labels: byCount[k] }));
+}
+
 function computeAll() {
   const s = collectState();
 
@@ -386,7 +421,14 @@ function computeAll() {
   const C = clampFloatOrNull(s.capacityConstant, 0);
   const fte = C && C > 0 ? monthlyWU / C : null;
 
-  return { state: s, domainScores, total, tier, dataVolumeRaw, dataVolumeFactor, rows, participantSubtotal, staticWU, preMultiplier, phase, monthlyWU, C, fte };
+  // Derived here, not in the render functions, so the screen panel, the
+  // printed report and tests/invariants.js all read the same verdict.
+  const participantTotal = rows.reduce((sum, r) => sum + r.count, 0);
+  const repeatedCounts = repeatedParticipantCounts(rows);
+  const capacityImplausible = capacityIsImplausible(C, staticWU);
+  const staticOnlyFte = capacityImplausible ? staticWU / C : null;
+
+  return { state: s, domainScores, total, tier, dataVolumeRaw, dataVolumeFactor, rows, participantSubtotal, staticWU, preMultiplier, phase, monthlyWU, C, fte, participantTotal, repeatedCounts, capacityImplausible, staticOnlyFte };
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -451,6 +493,26 @@ function generateParticipantInputs() {
       </div>`).join('');
 }
 
+// One wording per hazard, shared by the live results panel and the printed
+// report — the report is the artifact that leaves the building, so a warning
+// that only ever appeared on screen would not have stopped the test batch.
+function joinLabels(labels) {
+  if (labels.length <= 1) return labels.join('');
+  return labels.slice(0, -1).join(', ') + ' and ' + labels[labels.length - 1];
+}
+
+function participantWarningHTML(computed) {
+  if (!computed.repeatedCounts.length) return '';
+  const lines = computed.repeatedCounts.map((d) =>
+    `The same count (${d.count}) appears in ${joinLabels(d.labels)}.`);
+  return `<p class="section-help warn">${lines.join(' ')} The five statuses are mutually exclusive — each participant belongs in exactly one of them this month. If that figure is total enrollment rather than the number currently in each status, the participant WU above is overstated.</p>`;
+}
+
+function capacityWarningHTML(computed) {
+  if (!computed.capacityImplausible) return '';
+  return `<p class="section-help warn">C = ${computed.C} WU/FTE/month is below this protocol's own Static WU (${fmt1(computed.staticWU)} at Tier ${computed.tier.n}), which accrues with nobody enrolled — so it implies <strong>${fmt2(computed.staticOnlyFte)} FTE before a single participant is enrolled</strong>. Confirm C came from the Part E time study rather than standing in as a placeholder; until then read the WU figure, not the FTE.</p>`;
+}
+
 function updateDomainSubtotals(domainScores) {
   for (const ds of domainScores) {
     const el = $(`subtotal_${ds.domain.id}`);
@@ -474,6 +536,8 @@ function renderPartBBreakdown(computed) {
   parts.push(`<tr><td colspan="3">× Phase multiplier — ${phase.label}</td><td class="num">×${fmt1(phase.value)}</td></tr>`);
   parts.push(`<tr class="total-row"><td colspan="3">Monthly Workload Units</td><td class="num"><strong>${fmt1(monthlyWU)}</strong></td></tr>`);
   parts.push(`</tbody></table>`);
+  parts.push(`<p class="section-help">Participants counted across all five statuses: <strong>${computed.participantTotal}</strong>. Each participant belongs in exactly one row.</p>`);
+  parts.push(participantWarningHTML(computed));
   $('partBBreakdown').innerHTML = parts.join('');
 }
 
@@ -483,7 +547,7 @@ function renderFteReadout(computed) {
     el.innerHTML = `<p class="muted">No capacity constant entered — FTE not calculated.</p>`;
     return;
   }
-  el.innerHTML = `<p>This protocol alone ≈ <strong>${fmt2(computed.fte)} FTE-equivalent</strong> (${fmt1(computed.monthlyWU)} WU ÷ ${computed.C} WU/FTE/month).</p>`;
+  el.innerHTML = `<p>This protocol alone ≈ <strong>${fmt2(computed.fte)} FTE-equivalent</strong> (${fmt1(computed.monthlyWU)} WU ÷ ${computed.C} WU/FTE/month).</p>` + capacityWarningHTML(computed);
 }
 
 function metaRow(label, value) {
@@ -540,9 +604,12 @@ function renderReport(computed) {
   parts.push(`<tr><td colspan="3">× Phase multiplier — ${phase.label}</td><td class="num">×${fmt1(phase.value)}</td></tr>`);
   parts.push(`<tr class="total-row"><td colspan="3">Monthly Workload Units</td><td class="num"><strong>${fmt1(monthlyWU)}</strong></td></tr>`);
   parts.push(`</tbody></table>`);
+  parts.push(`<p class="section-help">Participants counted across all five statuses: <strong>${computed.participantTotal}</strong>. Each participant belongs in exactly one row.</p>`);
+  parts.push(participantWarningHTML(computed));
 
   if (C != null) {
     parts.push(`<p>FTE-equivalent for this protocol alone: <strong>${fmt2(fte)}</strong> (C = ${C} WU/FTE/month, site-supplied). This is not a staffing determination — a regulatory coordinator's WU and a bedside CRC's WU are not substitutable, and portfolio-level concurrency penalties are not reflected here.</p>`);
+    parts.push(capacityWarningHTML(computed));
   }
 
   if (meta.notes && meta.notes.trim()) {
