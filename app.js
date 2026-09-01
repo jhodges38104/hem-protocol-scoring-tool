@@ -223,6 +223,19 @@ function todayISO() {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
+// One resolver for both sides of the phase. computeAll() has always fallen
+// back to DEFAULT_PHASE for an id this build doesn't have; applyState() used
+// to write the unknown id straight into the <select>, and setting a select's
+// value to something no option carries sets selectedIndex to -1 — so the
+// control rendered blank while the report quietly costed the protocol at
+// DEFAULT_PHASE's rate. Resolving in both places means the form always shows
+// the multiplier actually being applied, and collectState() can no longer
+// carry an id this build can't honour back into the autosave or an export.
+function resolvePhase(id) {
+  return PHASE_MULTIPLIERS.find((p) => p.id === id)
+    || PHASE_MULTIPLIERS.find((p) => p.id === DEFAULT_PHASE);
+}
+
 function tierFor(total) {
   return TIERS.find((t) => total <= t.max) || TIERS[TIERS.length - 1];
 }
@@ -275,7 +288,7 @@ function applyState(s) {
   }
   if (s.items) for (const [k, v] of Object.entries(s.items)) setVal(`item_${k}`, v);
   if (s.participants) for (const [k, v] of Object.entries(s.participants)) setVal(`p_${k}`, v);
-  if (s.phase) setVal('phaseSelect', s.phase);
+  if (s.phase) setVal('phaseSelect', resolvePhase(s.phase).id);
   setVal('capacityConstant', s.capacityConstant ?? '');
 }
 
@@ -367,7 +380,7 @@ function computeAll() {
   const participantSubtotal = rows.reduce((sum, r) => sum + r.subtotal, 0);
   const staticWU = STATIC_WU[tier.n];
   const preMultiplier = staticWU + participantSubtotal;
-  const phase = PHASE_MULTIPLIERS.find((p) => p.id === s.phase) || PHASE_MULTIPLIERS.find((p) => p.id === DEFAULT_PHASE);
+  const phase = resolvePhase(s.phase);
   const monthlyWU = preMultiplier * phase.value;
 
   const C = clampFloatOrNull(s.capacityConstant, 0);

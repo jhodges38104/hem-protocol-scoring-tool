@@ -94,7 +94,7 @@ const NAMES = [
   'applyState', 'hasAnyData', 'isPlausibleState', 'schemaGapMessage', 'exportCsv',
   'hideRestoreBanner', 'generatePhaseOptions', 'DEFAULT_PHASE',
   'onImportJsonFile', 'resetFormToDefaults', 'update', 'AUTOFILLED_META_KEYS',
-  'PARTICIPANT_MAX', 'generateParticipantInputs',
+  'PARTICIPANT_MAX', 'generateParticipantInputs', 'resolvePhase',
 ];
 (0, eval)(readText('app.js') + '\n;globalThis.APP = { ' + NAMES.join(', ') + ' };');
 const APP = globalThis.APP;
@@ -713,6 +713,45 @@ for (const [palette, tokens] of [['light', light], ['dark', dark], ['print', pri
     }
   }
 }
+
+// ─────────────────────────────────────────────────────────────────────────
+// 13. An unrecognised phase resolves in the form, not just in the arithmetic
+//
+// computeAll() has always fallen back to DEFAULT_PHASE for an id this build
+// doesn't carry. applyState() didn't: it wrote the unknown id into the
+// <select>, which sets selectedIndex to -1 in a browser — a blank control
+// above a report saying "Steady state — ×1.0". Worse, collectState() then read
+// that id back out and the autosave kept it. Both sides go through
+// resolvePhase() now, so the form states the multiplier being applied.
+// ─────────────────────────────────────────────────────────────────────────
+section('Unrecognised phase');
+
+for (const ph of APP.PHASE_MULTIPLIERS) {
+  eq(`resolvePhase("${ph.id}") returns that phase`, APP.resolvePhase(ph.id).id, ph.id);
+}
+for (const junk of ['no_such_phase', '', null, undefined, 0]) {
+  eq(`resolvePhase(${JSON.stringify(junk)}) falls back to DEFAULT_PHASE`,
+    APP.resolvePhase(junk).id, APP.DEFAULT_PHASE);
+}
+
+elements = new Map();
+lsStore = {};
+APP.init();
+APP.applyState({ meta: {}, items: {}, participants: {}, phase: 'no_such_phase' });
+eq('applying an unknown phase leaves a real id in the form',
+  APP.collectState().phase, APP.DEFAULT_PHASE);
+eq('the form and the computation name the same phase',
+  APP.computeAll().phase.id, APP.collectState().phase);
+
+// The id must not survive into what the next load reads back.
+APP.update();
+eq('the autosave carries the resolved phase, not the unknown one',
+  JSON.parse(lsStore[APP.LS_KEY]).phase, APP.DEFAULT_PHASE);
+
+// A phase this build does carry is still applied verbatim.
+APP.applyState({ meta: {}, items: {}, participants: {}, phase: 'audit' });
+eq('a known phase is applied unchanged', APP.collectState().phase, 'audit');
+close('a known phase still costs its own multiplier', APP.computeAll().phase.value, 1.4);
 
 // ─────────────────────────────────────────────────────────────────────────
 
