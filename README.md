@@ -19,7 +19,7 @@ figure, and can print/export the result.
 - **[docs/quick-guide.md](docs/quick-guide.md)** — score a protocol in about ten minutes.
 - **[docs/user-guide.md](docs/user-guide.md)** — governance, the two-scorer reconciliation workflow, how to interpret a result (tier, WU, FTE) without overreaching, FAQ, glossary.
 - **[docs/rubric.md](docs/rubric.md)** — the full rubric write-up: every domain/item table, the Part B formula, the validation plan, and a references list (verified citations for OPAL, IWAT, and the reliability-statistics literature the validation plan calls for). The original [`docs/TrialComplexityRubric.pdf`](docs/TrialComplexityRubric.pdf) is included alongside it.
-- **[docs/quick-reference-card.html](docs/quick-reference-card.html)** — printable 2-page scoring + Part B reference (open in a browser, Cmd/Ctrl+P). Generated directly from `app.js`'s `DOMAINS`/`TIERS`/etc. tables, not hand-transcribed, so it can't drift from what the live tool actually scores.
+- **[docs/quick-reference-card.html](docs/quick-reference-card.html)** — printable 2-page scoring + Part B reference (open in a browser, Cmd/Ctrl+P). Generated from `app.js`'s `DOMAINS`/`TIERS`/etc. tables rather than hand-transcribed, and checked back against them by `tests/invariants.js`, which gates the deploy — so a card that stops matching what the live tool scores fails CI instead of going to the laminator.
 - **[docs/laminated-card.html](docs/laminated-card.html)** — the same content as a double-sided card (front = scoring criteria, back = tiers/Part B/caveats) sized for duplex printing and lamination.
 
 ## Using it
