@@ -94,6 +94,7 @@ const NAMES = [
   'applyState', 'hasAnyData', 'isPlausibleState', 'schemaGapMessage', 'exportCsv',
   'hideRestoreBanner', 'generatePhaseOptions', 'DEFAULT_PHASE',
   'onImportJsonFile', 'resetFormToDefaults', 'update', 'AUTOFILLED_META_KEYS',
+  'PARTICIPANT_MAX', 'generateParticipantInputs',
 ];
 (0, eval)(readText('app.js') + '\n;globalThis.APP = { ' + NAMES.join(', ') + ' };');
 const APP = globalThis.APP;
@@ -545,6 +546,58 @@ const implausibleFeedback = importFile('{"hello":"world"}');
 eq('an implausible import also leaves the form untouched', APP.computeAll().total, 5);
 check('an implausible import explains itself too',
   implausibleFeedback.includes('does not look like'));
+
+// ─────────────────────────────────────────────────────────────────────────
+// 10. index.html no longer restates STATUS_ROWS either
+//
+// The same contract section 7 covers for the phase <select>, and this was the
+// last place left holding it: the participant grid restated all five status
+// ids and labels as static markup. strVal() returns '' for an element that
+// isn't there, so renaming a status id in STATUS_ROWS alone never errored —
+// every count read as 0 and the protocol costed Static WU alone. The grid is
+// generated now, and PARTICIPANT_MAX reaches the inputs as a max attribute so
+// the field and the computation can't state different ceilings.
+// ─────────────────────────────────────────────────────────────────────────
+section('index.html / STATUS_ROWS consistency');
+
+const gridHtml = (html.match(/<div class="status-grid"[^>]*>([\s\S]*?)<\/div>\s*<h3>/) || [])[1] || '';
+check('the participant grid is a mount point in index.html', html.includes('id="participantsRoot"'));
+eq('index.html declares no participant inputs of its own', (gridHtml.match(/<input/g) || []).length, 0);
+check('index.html states no participant id of its own', !/id="p_/.test(html));
+check('index.html states no status label of its own',
+  !APP.STATUS_ROWS.some((r) => html.includes('>' + r.label + '</label>')));
+
+boot = bootWith(null);
+const grid = stubEl('participantsRoot').innerHTML;
+eq('one input generated per status row', (grid.match(/<input/g) || []).length, APP.STATUS_ROWS.length);
+for (const r of APP.STATUS_ROWS) {
+  check(`generated input "${r.id}" carries its id`, grid.includes(`id="p_${r.id}"`));
+  check(`generated input "${r.id}" is labelled from STATUS_ROWS`,
+    grid.includes(`<label for="p_${r.id}">${r.label}</label>`));
+}
+eq('every generated input states PARTICIPANT_MAX as its max',
+  (grid.match(new RegExp('max="' + APP.PARTICIPANT_MAX + '"', 'g')) || []).length, APP.STATUS_ROWS.length);
+
+// Every generated id must reach computeAll() — the direction that used to fail
+// silently, leaving the protocol costed at Static WU alone.
+for (const r of APP.STATUS_ROWS) {
+  const c = score({}, { [r.id]: 1 });
+  close(`status "${r.id}" reaches Part B at its own rate`, c.participantSubtotal, r.wu[c.tier.n]);
+}
+const everyRow = score({}, Object.fromEntries(APP.STATUS_ROWS.map((r) => [r.id, 2])));
+close('all five rows sum into the participant subtotal', everyRow.participantSubtotal,
+  APP.STATUS_ROWS.reduce((sum, r) => sum + 2 * r.wu[everyRow.tier.n], 0));
+
+// One ceiling: the attribute the field clamps against and the bound
+// computeAll()/exportCsv() apply are the same constant.
+const overCeiling = score({}, { active: APP.PARTICIPANT_MAX + 1000 });
+eq('a count above the ceiling clamps in Part B',
+  overCeiling.rows.find((r) => r.row.id === 'active').count, APP.PARTICIPANT_MAX);
+APP.exportCsv();
+const ceilLines = lastBlobText.trim().split('\r\n');
+eq('the CSV clamps to the same ceiling',
+  parseCsvLine(ceilLines[1])[parseCsvLine(ceilLines[0]).indexOf('participants_active')],
+  String(APP.PARTICIPANT_MAX));
 
 // ─────────────────────────────────────────────────────────────────────────
 

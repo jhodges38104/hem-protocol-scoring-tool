@@ -150,6 +150,14 @@ const STATUS_ROWS = [
   { id: 'closeout', label: 'Closed to accrual, data cleaning/closeout', wu: { 1: 0.2, 2: 0.3, 3: 0.5, 4: 0.8, 5: 1.0 } },
 ];
 
+// A practical unbounded ceiling for a monthly participant count. Emitted onto
+// the generated inputs as well as applied in computeAll() and exportCsv(), so
+// the number in the field can't disagree with the number the report and the
+// CSV are computed from. Before, the inputs carried no max attribute at all:
+// onFocusOutClamp() fell back to Number.MAX_SAFE_INTEGER, so a typed 5000000
+// stayed on screen while every computed figure quietly used 999999.
+const PARTICIPANT_MAX = 999999;
+
 const STATIC_WU = { 1: 2, 2: 4, 3: 8, 4: 14, 5: 22 };
 
 // The phase selected when nothing else is, and the fallback when a loaded state
@@ -351,7 +359,7 @@ function computeAll() {
   const dataVolumeFactor = 1 + DATA_VOLUME_FACTOR_RANGE * (DATA_VOLUME_MAX > 0 ? dataVolumeRaw / DATA_VOLUME_MAX : 0);
 
   const rows = STATUS_ROWS.map((r) => {
-    const count = clampInt(s.participants[r.id], 0, 999999);
+    const count = clampInt(s.participants[r.id], 0, PARTICIPANT_MAX);
     const perUnit = r.wu[tier.n];
     const subtotal = count * perUnit * dataVolumeFactor;
     return { row: r, count, perUnit, subtotal };
@@ -412,6 +420,22 @@ function generatePhaseOptions() {
     // steady-state option as "×1" where the markup it replaces read "×1.0".
     .map((p) => `<option value="${p.id}"${p.id === DEFAULT_PHASE ? ' selected' : ''}>${p.label} — ×${fmt1(p.value)}</option>`)
     .join('');
+}
+
+// The participant grid was the last place index.html restated one of app.js's
+// tables — five ids and five labels in static markup against STATUS_ROWS.
+// collectState() reads `p_${r.id}` through strVal(), which returns '' for an
+// element that isn't there, so renaming a status id in the table alone didn't
+// error: every participant count read as 0 and the protocol costed Static WU
+// alone. Exactly the failure the phase <select> had, and the same fix — one
+// definition of a status row, in STATUS_ROWS.
+function generateParticipantInputs() {
+  const el = $('participantsRoot');
+  if (!el) return;
+  el.innerHTML = STATUS_ROWS.map((r) => `<div class="field">
+        <label for="p_${r.id}">${r.label}</label>
+        <input type="number" id="p_${r.id}" min="0" max="${PARTICIPANT_MAX}" step="1" value="0" inputmode="numeric">
+      </div>`).join('');
 }
 
 function updateDomainSubtotals(domainScores) {
@@ -629,7 +653,7 @@ function exportCsv() {
   add('tier_number', computed.tier.n);
   add('tier_label', computed.tier.label);
 
-  for (const r of STATUS_ROWS) add(`participants_${r.id}`, clampInt(s.participants[r.id], 0, 999999));
+  for (const r of STATUS_ROWS) add(`participants_${r.id}`, clampInt(s.participants[r.id], 0, PARTICIPANT_MAX));
   add('phase_id', computed.phase.id);
   add('phase_multiplier', computed.phase.value);
   add('data_volume_raw', computed.dataVolumeRaw);
@@ -755,10 +779,12 @@ function wireEvents() {
 
 function init() {
   generateDomains();
-  // Before any applyState() below — setting a <select>'s value does nothing if
-  // the matching option hasn't been generated yet, which would drop a restored
-  // or imported phase back to the default.
+  // Both before any applyState() below. setVal() is a silent no-op on an
+  // element that doesn't exist yet, and setting a <select>'s value does nothing
+  // if the matching option hasn't been generated — either way a restored or
+  // imported entry drops back to the default with nothing to show for it.
   generatePhaseOptions();
+  generateParticipantInputs();
 
   // These two headings ship real numbers in index.html so they read correctly
   // if the script fails, then get overwritten from the constants that own them
