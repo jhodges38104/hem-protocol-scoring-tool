@@ -150,6 +150,14 @@ const STATUS_ROWS = [
   { id: 'closeout', label: 'Closed to accrual, data cleaning/closeout', wu: { 1: 0.2, 2: 0.3, 3: 0.5, 4: 0.8, 5: 1.0 } },
 ];
 
+// A practical unbounded ceiling for a monthly participant count. Emitted onto
+// the generated inputs as well as applied in computeAll() and exportCsv(), so
+// the number in the field can't disagree with the number the report and the
+// CSV are computed from. Before, the inputs carried no max attribute at all:
+// onFocusOutClamp() fell back to Number.MAX_SAFE_INTEGER, so a typed 5000000
+// stayed on screen while every computed figure quietly used 999999.
+const PARTICIPANT_MAX = 999999;
+
 const STATIC_WU = { 1: 2, 2: 4, 3: 8, 4: 14, 5: 22 };
 
 // The phase selected when nothing else is, and the fallback when a loaded state
@@ -215,6 +223,19 @@ function todayISO() {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
+// One resolver for both sides of the phase. computeAll() has always fallen
+// back to DEFAULT_PHASE for an id this build doesn't have; applyState() used
+// to write the unknown id straight into the <select>, and setting a select's
+// value to something no option carries sets selectedIndex to -1 — so the
+// control rendered blank while the report quietly costed the protocol at
+// DEFAULT_PHASE's rate. Resolving in both places means the form always shows
+// the multiplier actually being applied, and collectState() can no longer
+// carry an id this build can't honour back into the autosave or an export.
+function resolvePhase(id) {
+  return PHASE_MULTIPLIERS.find((p) => p.id === id)
+    || PHASE_MULTIPLIERS.find((p) => p.id === DEFAULT_PHASE);
+}
+
 function tierFor(total) {
   return TIERS.find((t) => total <= t.max) || TIERS[TIERS.length - 1];
 }
@@ -267,7 +288,7 @@ function applyState(s) {
   }
   if (s.items) for (const [k, v] of Object.entries(s.items)) setVal(`item_${k}`, v);
   if (s.participants) for (const [k, v] of Object.entries(s.participants)) setVal(`p_${k}`, v);
-  if (s.phase) setVal('phaseSelect', s.phase);
+  if (s.phase) setVal('phaseSelect', resolvePhase(s.phase).id);
   setVal('capacityConstant', s.capacityConstant ?? '');
 }
 
@@ -289,9 +310,26 @@ function schemaGapMessage(schema, lead) {
   return `${lead} was saved under schema ${schema ?? '?'}, which predates Domain 8 — Data Volume, Abstraction & Registry Burden, added in Rubric v0.2. Its five items are set to 0 here. Score them before treating this total or tier as current.`;
 }
 
+// Meta fields the tool fills in by itself: init()/resetFormToDefaults() write
+// today's date, and the score-type <select> ships a default. They therefore
+// carry a value on a form nobody has touched, and can never distinguish a real
+// entry from a blank one — so hasAnyData() must not count them.
+//
+// Counting them meant every virgin form reported data, which broke both of
+// hasAnyData()'s callers at once: wireArmedButton()'s two-click confirm armed
+// when there was nothing to lose, and — worse — init()'s autosave of the blank
+// default state looked like a real entry, so the restore banner fired on every
+// visit after the first. That banner is also what carries the schema-gap
+// warning, and a banner that cries wolf on every load is one scorers learn to
+// dismiss without reading.
+const AUTOFILLED_META_KEYS = ['scoreDate', 'scoreType'];
+
 function hasAnyData(s) {
   const vals = (o) => (o && typeof o === 'object' ? Object.values(o) : []);
-  const metaNonEmpty = vals(s.meta).some((v) => String(v || '').trim() !== '');
+  const typedMeta = (o) => (o && typeof o === 'object'
+    ? Object.entries(o).filter(([k]) => !AUTOFILLED_META_KEYS.includes(k)).map(([, v]) => v)
+    : []);
+  const metaNonEmpty = typedMeta(s.meta).some((v) => String(v || '').trim() !== '');
   const itemsNonZero = vals(s.items).some((v) => Number(v) > 0);
   const participantsNonZero = vals(s.participants).some((v) => Number(v) > 0);
   return metaNonEmpty || itemsNonZero || participantsNonZero;
@@ -334,7 +372,7 @@ function computeAll() {
   const dataVolumeFactor = 1 + DATA_VOLUME_FACTOR_RANGE * (DATA_VOLUME_MAX > 0 ? dataVolumeRaw / DATA_VOLUME_MAX : 0);
 
   const rows = STATUS_ROWS.map((r) => {
-    const count = clampInt(s.participants[r.id], 0, 999999);
+    const count = clampInt(s.participants[r.id], 0, PARTICIPANT_MAX);
     const perUnit = r.wu[tier.n];
     const subtotal = count * perUnit * dataVolumeFactor;
     return { row: r, count, perUnit, subtotal };
@@ -342,7 +380,7 @@ function computeAll() {
   const participantSubtotal = rows.reduce((sum, r) => sum + r.subtotal, 0);
   const staticWU = STATIC_WU[tier.n];
   const preMultiplier = staticWU + participantSubtotal;
-  const phase = PHASE_MULTIPLIERS.find((p) => p.id === s.phase) || PHASE_MULTIPLIERS.find((p) => p.id === DEFAULT_PHASE);
+  const phase = resolvePhase(s.phase);
   const monthlyWU = preMultiplier * phase.value;
 
   const C = clampFloatOrNull(s.capacityConstant, 0);
@@ -395,6 +433,22 @@ function generatePhaseOptions() {
     // steady-state option as "×1" where the markup it replaces read "×1.0".
     .map((p) => `<option value="${p.id}"${p.id === DEFAULT_PHASE ? ' selected' : ''}>${p.label} — ×${fmt1(p.value)}</option>`)
     .join('');
+}
+
+// The participant grid was the last place index.html restated one of app.js's
+// tables — five ids and five labels in static markup against STATUS_ROWS.
+// collectState() reads `p_${r.id}` through strVal(), which returns '' for an
+// element that isn't there, so renaming a status id in the table alone didn't
+// error: every participant count read as 0 and the protocol costed Static WU
+// alone. Exactly the failure the phase <select> had, and the same fix — one
+// definition of a status row, in STATUS_ROWS.
+function generateParticipantInputs() {
+  const el = $('participantsRoot');
+  if (!el) return;
+  el.innerHTML = STATUS_ROWS.map((r) => `<div class="field">
+        <label for="p_${r.id}">${r.label}</label>
+        <input type="number" id="p_${r.id}" min="0" max="${PARTICIPANT_MAX}" step="1" value="0" inputmode="numeric">
+      </div>`).join('');
 }
 
 function updateDomainSubtotals(domainScores) {
@@ -612,7 +666,7 @@ function exportCsv() {
   add('tier_number', computed.tier.n);
   add('tier_label', computed.tier.label);
 
-  for (const r of STATUS_ROWS) add(`participants_${r.id}`, clampInt(s.participants[r.id], 0, 999999));
+  for (const r of STATUS_ROWS) add(`participants_${r.id}`, clampInt(s.participants[r.id], 0, PARTICIPANT_MAX));
   add('phase_id', computed.phase.id);
   add('phase_multiplier', computed.phase.value);
   add('data_volume_raw', computed.dataVolumeRaw);
@@ -645,6 +699,14 @@ function onImportJsonFile(e) {
     try {
       const obj = JSON.parse(String(reader.result));
       if (!isPlausibleState(obj)) throw new Error('missing items/meta');
+      // Reset first: applyState() only writes the ids the file actually
+      // contains, so importing onto a form that already has entries merges the
+      // two protocols instead of replacing one with the other. That made the
+      // button's own label ("overwrites current form") and the schema-gap
+      // warning ("its five items are set to 0 here") both untrue — a pre-v0.2
+      // file imported over a scored form kept the previous protocol's Domain 8
+      // values and folded them into the new total.
+      resetFormToDefaults();
       applyState(obj);
       showImportFeedback(obj.schema === SCHEMA_VERSION ? '' : schemaGapMessage(obj.schema, 'The file you imported'));
       update();
@@ -730,10 +792,12 @@ function wireEvents() {
 
 function init() {
   generateDomains();
-  // Before any applyState() below — setting a <select>'s value does nothing if
-  // the matching option hasn't been generated yet, which would drop a restored
-  // or imported phase back to the default.
+  // Both before any applyState() below. setVal() is a silent no-op on an
+  // element that doesn't exist yet, and setting a <select>'s value does nothing
+  // if the matching option hasn't been generated — either way a restored or
+  // imported entry drops back to the default with nothing to show for it.
   generatePhaseOptions();
+  generateParticipantInputs();
 
   // These two headings ship real numbers in index.html so they read correctly
   // if the script fails, then get overwritten from the constants that own them

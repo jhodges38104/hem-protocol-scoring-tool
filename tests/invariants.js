@@ -76,7 +76,11 @@ globalThis.localStorage = {
 };
 globalThis.Blob = function Blob(parts) { lastBlobText = parts.join(''); };
 globalThis.URL = { createObjectURL: () => 'blob:stub', revokeObjectURL() {} };
-globalThis.FileReader = function FileReader() {};
+// Functional enough to drive the real onImportJsonFile(): it assigns onload
+// before calling readAsText, so firing synchronously is faithful here.
+globalThis.FileReader = function FileReader() {
+  this.readAsText = (file) => { this.result = file.text; if (this.onload) this.onload(); };
+};
 if (typeof setTimeout !== 'function') globalThis.setTimeout = () => 0;
 
 // Indirect eval runs in global scope, so app.js's top-level declarations are
@@ -89,6 +93,8 @@ const NAMES = [
   'tierFor', 'computeAll', 'generateDomains', 'init', 'setVal', 'collectState',
   'applyState', 'hasAnyData', 'isPlausibleState', 'schemaGapMessage', 'exportCsv',
   'hideRestoreBanner', 'generatePhaseOptions', 'DEFAULT_PHASE',
+  'onImportJsonFile', 'resetFormToDefaults', 'update', 'AUTOFILLED_META_KEYS',
+  'PARTICIPANT_MAX', 'generateParticipantInputs', 'resolvePhase',
 ];
 (0, eval)(readText('app.js') + '\n;globalThis.APP = { ' + NAMES.join(', ') + ' };');
 const APP = globalThis.APP;
@@ -426,6 +432,326 @@ check('the Part B help text has the element init() fills', html.includes('id="da
 eq('init() fills the data volume range from DATA_VOLUME_FACTOR_RANGE',
   stubEl('dataVolumeRangeLabel').textContent,
   `×1.0–×${(1 + APP.DATA_VOLUME_FACTOR_RANGE).toFixed(1)}`);
+
+// ─────────────────────────────────────────────────────────────────────────
+// 8. A form nobody has touched is not "data"
+//
+// init() writes today's score date and the score-type <select> ships a
+// default, so meta is never entirely empty. While hasAnyData() counted those,
+// a virgin form reported data and both of its callers misfired: the
+// destructive-action confirms armed with nothing to lose, and init()'s own
+// autosave of the blank default state came back as a "restored entry" on the
+// next load. The banner that fired is the one that also carries the schema-gap
+// warning — the reason a false positive on every visit is not cosmetic.
+// ─────────────────────────────────────────────────────────────────────────
+section('A virgin form is not data');
+
+boot = bootWith(null);
+const virgin = APP.collectState();
+check('init() still fills the score date on a virgin form',
+  /^\d{4}-\d{2}-\d{2}$/.test(String(virgin.meta.scoreDate)));
+check('a virgin form does not count as data', !APP.hasAnyData(virgin));
+check('hasAnyData ignores every autofilled meta key even when populated',
+  !APP.hasAnyData({ meta: Object.fromEntries(APP.AUTOFILLED_META_KEYS.map((k) => [k, 'set'])), items: {}, participants: {} }));
+
+// The other direction: anything the scorer can actually type must still count.
+check('a typed meta field still counts as data',
+  APP.hasAnyData({ meta: { protocolId: 'HEM-2026-014' }, items: {}, participants: {} }));
+check('a scored item still counts as data',
+  APP.hasAnyData({ meta: {}, items: { reg_status: '3' }, participants: {} }));
+check('a participant count still counts as data',
+  APP.hasAnyData({ meta: {}, items: {}, participants: { active: '5' } }));
+
+// The regression itself, end to end: open the tool with nothing saved, type
+// nothing, then open it again against whatever that first visit autosaved.
+elements = new Map();
+lsStore = {};
+APP.init();
+const virginAutosave = lsStore[APP.LS_KEY];
+check('a virgin visit still autosaves', !!virginAutosave);
+boot = bootWith(virginAutosave);
+check('the next visit shows no restore banner for an untouched form',
+  boot.banner.hidden === true);
+
+elements = new Map();
+lsStore = {};
+APP.init();
+APP.setVal('metaProtocolId', 'HEM-2026-014');
+APP.update();
+boot = bootWith(lsStore[APP.LS_KEY]);
+check('a visit that did enter something still restores and banners',
+  boot.banner.hidden === false);
+
+// ─────────────────────────────────────────────────────────────────────────
+// 9. Import replaces the form, it does not merge into it
+//
+// applyState() only writes the ids the loaded state actually contains, so
+// importing onto a form that already has entries used to fold two protocols
+// into one score — while the button label said "overwrites current form" and
+// the schema-gap warning said the five Domain 8 items were "set to 0 here".
+// onImportJsonFile() now resets first, which is what makes both true.
+// ─────────────────────────────────────────────────────────────────────────
+section('Import replaces the form');
+
+function importFile(text) {
+  APP.onImportJsonFile({ target: { files: [{ text }], value: 'chosen.json' } });
+  return stubEl('importFeedback').textContent;
+}
+
+elements = new Map();
+lsStore = {};
+APP.init();
+// A scorer part-way through a v0.2 score, Domain 8 fully entered.
+for (const it of APP.DOMAINS[7].items) APP.setVal('item_' + it.id, it.max);
+APP.setVal('metaProtocolId', 'HEM-2026-999');
+eq('setup: Domain 8 is fully scored before the import',
+  APP.computeAll().domainScores[7].capped, APP.DOMAINS[7].max);
+
+// A pre-v0.2 export: it names no Domain 8 item at all.
+const legacyFeedback = importFile(JSON.stringify({
+  schema: 1, meta: { protocolId: 'HEM-2025-001' },
+  items: { reg_status: 5, sponsor_type: 3 }, participants: { active: 5 },
+}));
+const imported = APP.computeAll();
+
+eq('Domain 8 is cleared by an import that never mentions it',
+  imported.domainScores[7].capped, 0);
+close('the data volume factor drops back to 1.0', imported.dataVolumeFactor, 1);
+eq('the total is exactly what the imported file describes', imported.total, 8);
+eq('the imported protocol id replaces the one on the form',
+  imported.state.meta.protocolId, 'HEM-2025-001');
+check('the schema gap is still reported', legacyFeedback.includes('Domain 8'));
+check('the warning\'s claim that the five items are 0 is now true',
+  APP.DOMAINS[7].items.every((it) => Number(APP.collectState().items[it.id]) === 0));
+
+const currentFeedback = importFile(JSON.stringify({
+  schema: APP.SCHEMA_VERSION, meta: { protocolId: 'HEM-2026-014' },
+  items: { chart_abstraction: 4 }, participants: {},
+}));
+eq('a current-schema import reports nothing', currentFeedback, '');
+eq('a current-schema import applies its own values and only its own',
+  APP.computeAll().total, 4);
+
+// The reset sits after the parse and the plausibility check on purpose: a file
+// that fails either must not cost the scorer the entry already on the form.
+elements = new Map();
+lsStore = {};
+APP.init();
+APP.setVal('item_reg_status', 5);
+const junkFeedback = importFile('not json at all');
+eq('a failed import leaves the form untouched', APP.computeAll().total, 5);
+check('a failed import still explains itself',
+  junkFeedback.includes('does not look like'));
+const implausibleFeedback = importFile('{"hello":"world"}');
+eq('an implausible import also leaves the form untouched', APP.computeAll().total, 5);
+check('an implausible import explains itself too',
+  implausibleFeedback.includes('does not look like'));
+
+// ─────────────────────────────────────────────────────────────────────────
+// 10. index.html no longer restates STATUS_ROWS either
+//
+// The same contract section 7 covers for the phase <select>, and this was the
+// last place left holding it: the participant grid restated all five status
+// ids and labels as static markup. strVal() returns '' for an element that
+// isn't there, so renaming a status id in STATUS_ROWS alone never errored —
+// every count read as 0 and the protocol costed Static WU alone. The grid is
+// generated now, and PARTICIPANT_MAX reaches the inputs as a max attribute so
+// the field and the computation can't state different ceilings.
+// ─────────────────────────────────────────────────────────────────────────
+section('index.html / STATUS_ROWS consistency');
+
+const gridHtml = (html.match(/<div class="status-grid"[^>]*>([\s\S]*?)<\/div>\s*<h3>/) || [])[1] || '';
+check('the participant grid is a mount point in index.html', html.includes('id="participantsRoot"'));
+eq('index.html declares no participant inputs of its own', (gridHtml.match(/<input/g) || []).length, 0);
+check('index.html states no participant id of its own', !/id="p_/.test(html));
+check('index.html states no status label of its own',
+  !APP.STATUS_ROWS.some((r) => html.includes('>' + r.label + '</label>')));
+
+boot = bootWith(null);
+const grid = stubEl('participantsRoot').innerHTML;
+eq('one input generated per status row', (grid.match(/<input/g) || []).length, APP.STATUS_ROWS.length);
+for (const r of APP.STATUS_ROWS) {
+  check(`generated input "${r.id}" carries its id`, grid.includes(`id="p_${r.id}"`));
+  check(`generated input "${r.id}" is labelled from STATUS_ROWS`,
+    grid.includes(`<label for="p_${r.id}">${r.label}</label>`));
+}
+eq('every generated input states PARTICIPANT_MAX as its max',
+  (grid.match(new RegExp('max="' + APP.PARTICIPANT_MAX + '"', 'g')) || []).length, APP.STATUS_ROWS.length);
+
+// Every generated id must reach computeAll() — the direction that used to fail
+// silently, leaving the protocol costed at Static WU alone.
+for (const r of APP.STATUS_ROWS) {
+  const c = score({}, { [r.id]: 1 });
+  close(`status "${r.id}" reaches Part B at its own rate`, c.participantSubtotal, r.wu[c.tier.n]);
+}
+const everyRow = score({}, Object.fromEntries(APP.STATUS_ROWS.map((r) => [r.id, 2])));
+close('all five rows sum into the participant subtotal', everyRow.participantSubtotal,
+  APP.STATUS_ROWS.reduce((sum, r) => sum + 2 * r.wu[everyRow.tier.n], 0));
+
+// One ceiling: the attribute the field clamps against and the bound
+// computeAll()/exportCsv() apply are the same constant.
+const overCeiling = score({}, { active: APP.PARTICIPANT_MAX + 1000 });
+eq('a count above the ceiling clamps in Part B',
+  overCeiling.rows.find((r) => r.row.id === 'active').count, APP.PARTICIPANT_MAX);
+APP.exportCsv();
+const ceilLines = lastBlobText.trim().split('\r\n');
+eq('the CSV clamps to the same ceiling',
+  parseCsvLine(ceilLines[1])[parseCsvLine(ceilLines[0]).indexOf('participants_active')],
+  String(APP.PARTICIPANT_MAX));
+
+// ─────────────────────────────────────────────────────────────────────────
+// 11. The printable cards still say what the tool scores
+//
+// README calls these "generated from app.js's DOMAINS/TIERS/etc. tables rather
+// than hand-transcribed" — true of how they were produced, but they are
+// checked in as static HTML with every number as a literal, and there is no
+// generator to re-run. Nothing but this section makes the second half of that
+// sentence true. A laminated card is what a scorer has in front of them when
+// the screen doesn't; one that has gone stale is a wrong score, not a typo.
+// ─────────────────────────────────────────────────────────────────────────
+section('Printable cards match the tables');
+
+// Domain-major item numbering, 1.1 … 8.5, as the cards print it.
+const ITEM_NUMBERS = APP.DOMAINS.flatMap((d, di) => d.items.map((it, ii) => `${di + 1}.${ii + 1}`));
+
+for (const cardPath of ['docs/quick-reference-card.html', 'docs/laminated-card.html']) {
+  const card = readText(cardPath);
+  const name = cardPath.replace('docs/', '');
+  // The cards escape & as &amp;; compare against both spellings.
+  const esc = (t) => String(t).replace(/&/g, '&amp;');
+  const has = (t) => card.includes(t) || card.includes(esc(t));
+  const cardRows = card.match(/<tr[\s\S]*?<\/tr>/g) || [];
+  const rowFor = (label) => cardRows.find((r) => r.includes(label) || r.includes(esc(label)));
+
+  eq(`${name}: one numbered row per item, in table order`,
+    (card.match(/class="itemno">([\d.]+)</g) || []).map((m) => m.replace(/\D*([\d.]+)</, '$1')).join(','),
+    ITEM_NUMBERS.join(','));
+
+  for (const d of APP.DOMAINS) {
+    check(`${name}: states "${d.title}"`, has(d.title));
+    check(`${name}: states domain ${d.id}'s range as 0–${d.max}`,
+      new RegExp('\\(0[–-]' + d.max + '\\)').test(card));
+    for (const it of d.items) {
+      const row = rowFor(it.label);
+      check(`${name}: has a row for "${it.label}"`, !!row);
+      check(`${name}: "${it.label}" is scored 0–${it.max}`,
+        !!row && new RegExp('0[–-]' + it.max + '(?!\\d)').test(row));
+    }
+  }
+
+  check(`${name}: states the Part A ceiling ${APP.PART_A_MAX}`, has(String(APP.PART_A_MAX)));
+  for (const t of APP.TIERS) {
+    check(`${name}: names tier ${t.n} "${t.label}"`, has(t.label));
+    check(`${name}: states tier ${t.n}'s Static WU (${APP.STATIC_WU[t.n]})`,
+      new RegExp('\\b' + APP.STATIC_WU[t.n] + '\\b').test(card));
+  }
+  for (const r of APP.STATUS_ROWS) check(`${name}: lists the "${r.label}" status row`, has(r.label));
+  for (const ph of APP.PHASE_MULTIPLIERS) {
+    check(`${name}: states the ${ph.id} multiplier as ×${ph.value.toFixed(1)}`,
+      card.includes(ph.value.toFixed(1)));
+  }
+  check(`${name}: states the data volume factor's ceiling`,
+    card.includes((1 + APP.DATA_VOLUME_FACTOR_RANGE).toFixed(1)));
+  check(`${name}: names the rubric version it was cut from`, has(APP.RUBRIC_VERSION.replace('Draft ', '')));
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// 12. Text tokens clear WCAG AA against every surface they sit on
+//
+// .item-anchor — the anchor descriptions a rater reads to choose a number —
+// is 12.5px --ink-muted. That token was #898781, which is 3.50:1 on
+// --surface-1: below the 4.5:1 floor for normal text, and below it only on
+// screen, since @media print already redefined it darker. Contrast is exactly
+// the kind of thing that regresses silently during a palette tweak, so the
+// floor is asserted rather than remembered.
+// ─────────────────────────────────────────────────────────────────────────
+section('Colour contrast (WCAG AA, 4.5:1)');
+
+const css = readText('styles.css');
+
+function tokensIn(block) {
+  const out = {};
+  for (const m of block.matchAll(/--([a-z0-9-]+):\s*(#[0-9a-fA-F]{6})\b/g)) out[m[1]] = m[2];
+  return out;
+}
+function rootBlockAt(from) {
+  const start = css.indexOf(':root {', from);
+  return start === -1 ? '' : css.slice(start, css.indexOf('}', start));
+}
+function relativeLuminance(hex) {
+  const chan = (i) => {
+    const c = parseInt(hex.slice(1 + i * 2, 3 + i * 2), 16) / 255;
+    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  };
+  return 0.2126 * chan(0) + 0.7152 * chan(1) + 0.0722 * chan(2);
+}
+function contrast(a, b) {
+  const [hi, lo] = [relativeLuminance(a), relativeLuminance(b)].sort((x, y) => y - x);
+  return (hi + 0.05) / (lo + 0.05);
+}
+
+// Sanity-check the maths against two known pairs before trusting it on tokens.
+close('contrast(#000,#fff) is 21', Math.round(contrast('#000000', '#ffffff')), 21);
+close('contrast(#ffffff,#ffffff) is 1', contrast('#ffffff', '#ffffff'), 1);
+
+const light = tokensIn(rootBlockAt(0));
+const dark = { ...light, ...tokensIn(rootBlockAt(css.indexOf('@media (prefers-color-scheme: dark)'))) };
+// Not `print`: that's jsc's global, and the log fallback above references it.
+const printPalette = { ...light, ...tokensIn(rootBlockAt(css.indexOf('@media print'))) };
+
+const INKS = ['ink-primary', 'ink-secondary', 'ink-muted'];
+const SURFACES = ['surface-1', 'surface-2', 'page-bg'];
+
+for (const [palette, tokens] of [['light', light], ['dark', dark], ['print', printPalette]]) {
+  check(`${palette}: every ink and surface token is defined`,
+    INKS.concat(SURFACES).every((t) => /^#[0-9a-fA-F]{6}$/.test(tokens[t] || '')));
+  for (const ink of INKS) {
+    for (const surface of SURFACES) {
+      const r = contrast(tokens[ink], tokens[surface]);
+      check(`${palette}: --${ink} on --${surface} clears 4.5:1`,
+        r >= 4.5, `${tokens[ink]} on ${tokens[surface]} is ${r.toFixed(2)}:1`);
+    }
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// 13. An unrecognised phase resolves in the form, not just in the arithmetic
+//
+// computeAll() has always fallen back to DEFAULT_PHASE for an id this build
+// doesn't carry. applyState() didn't: it wrote the unknown id into the
+// <select>, which sets selectedIndex to -1 in a browser — a blank control
+// above a report saying "Steady state — ×1.0". Worse, collectState() then read
+// that id back out and the autosave kept it. Both sides go through
+// resolvePhase() now, so the form states the multiplier being applied.
+// ─────────────────────────────────────────────────────────────────────────
+section('Unrecognised phase');
+
+for (const ph of APP.PHASE_MULTIPLIERS) {
+  eq(`resolvePhase("${ph.id}") returns that phase`, APP.resolvePhase(ph.id).id, ph.id);
+}
+for (const junk of ['no_such_phase', '', null, undefined, 0]) {
+  eq(`resolvePhase(${JSON.stringify(junk)}) falls back to DEFAULT_PHASE`,
+    APP.resolvePhase(junk).id, APP.DEFAULT_PHASE);
+}
+
+elements = new Map();
+lsStore = {};
+APP.init();
+APP.applyState({ meta: {}, items: {}, participants: {}, phase: 'no_such_phase' });
+eq('applying an unknown phase leaves a real id in the form',
+  APP.collectState().phase, APP.DEFAULT_PHASE);
+eq('the form and the computation name the same phase',
+  APP.computeAll().phase.id, APP.collectState().phase);
+
+// The id must not survive into what the next load reads back.
+APP.update();
+eq('the autosave carries the resolved phase, not the unknown one',
+  JSON.parse(lsStore[APP.LS_KEY]).phase, APP.DEFAULT_PHASE);
+
+// A phase this build does carry is still applied verbatim.
+APP.applyState({ meta: {}, items: {}, participants: {}, phase: 'audit' });
+eq('a known phase is applied unchanged', APP.collectState().phase, 'audit');
+close('a known phase still costs its own multiplier', APP.computeAll().phase.value, 1.4);
 
 // ─────────────────────────────────────────────────────────────────────────
 
