@@ -72,7 +72,7 @@ Two headings still ship a number in the markup, deliberately: the Part A ceiling
 
 ## Documentation structure
 
-`docs/rubric.md` is the canonical source for every rubric number — it says so explicitly ("Numbers here are the single source of truth for this project"). `docs/quick-guide.md` (a ~10-minute operational walkthrough) and `docs/user-guide.md` (longer reference: two-scorer reconciliation workflow, an "interpreting your result" section, FAQ, glossary) both link into specific `rubric.md` anchors instead of restating its tables. `docs/TrialComplexityRubric.pdf` is the original source document `rubric.md` transcribes and reorganizes.
+`docs/rubric.md` is the canonical source for every rubric number — it says so explicitly ("Numbers here are the single source of truth for this project"). `docs/quick-guide.md` (a ~10-minute operational walkthrough), `docs/user-guide.md` (longer reference: two-scorer reconciliation workflow, an "interpreting your result" section, FAQ, glossary) and `docs/wu-fte-guide.md` (study-team-facing: what WU and the FTE line mean, the two plausibility warnings, and `rubric.md` §6 restated as schedulable work with owners, sample sizes and pass criteria) all link into specific `rubric.md` anchors instead of restating its tables. `docs/TrialComplexityRubric.pdf` is the original source document `rubric.md` transcribes and reorganizes.
 
 This is a separate hierarchy from `app.js`'s `DOMAINS`/`TIERS`/etc. tables, which are the source of truth for the *running code*. Nothing links the two — they're independent, hand-maintained descriptions of the same numbers. A weight changed in one won't propagate to the other; changing a rubric number means updating both `app.js` and `docs/rubric.md` yourself.
 

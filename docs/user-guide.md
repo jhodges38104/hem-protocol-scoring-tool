@@ -145,4 +145,4 @@ The tool is a static page with no backend — there is nowhere for your entries 
 | ICC | Intraclass Correlation Coefficient — inter-rater reliability for a total score |
 
 ---
-Shorter version: [quick-guide.md](quick-guide.md). Full tables, formulas, and references: [rubric.md](rubric.md).
+Shorter version: [quick-guide.md](quick-guide.md). What WU and FTE mean and how to validate them: [wu-fte-guide.md](wu-fte-guide.md). Full tables, formulas, and references: [rubric.md](rubric.md).
