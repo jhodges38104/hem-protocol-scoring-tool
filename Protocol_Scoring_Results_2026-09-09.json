@@ -1,0 +1,2015 @@
+{
+  "generated": "2026-09-09",
+  "rubricVersion": "Draft v0.2",
+  "toolVersion": "2.0.0",
+  "partAMax": 116,
+  "scoredHere": [
+    {
+      "id": "BHEEM",
+      "pi": "Sharma",
+      "scored": true,
+      "partA": 74,
+      "partAMax": 116,
+      "tier": "High",
+      "tierLabel": "High",
+      "domains": {
+        "d1": {
+          "raw": 13,
+          "capped": 13,
+          "max": 18
+        },
+        "d2": {
+          "raw": 6,
+          "capped": 6,
+          "max": 12
+        },
+        "d3": {
+          "raw": 15,
+          "capped": 15,
+          "max": 18
+        },
+        "d4": {
+          "raw": 7,
+          "capped": 7,
+          "max": 12
+        },
+        "d5": {
+          "raw": 14,
+          "capped": 14,
+          "max": 16
+        },
+        "d6": {
+          "raw": 12,
+          "capped": 12,
+          "max": 12
+        },
+        "d7": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d8": {
+          "raw": 7,
+          "capped": 7,
+          "max": 16
+        }
+      },
+      "dataVolumeFactor": 1.1285714285714286,
+      "phase": "steady",
+      "partB": null,
+      "partBNote": "no participant counts supplied - WU/FTE not computable"
+    },
+    {
+      "id": "CASPERKID",
+      "pi": "Sharma",
+      "scored": true,
+      "partA": 75,
+      "partAMax": 116,
+      "tier": "High",
+      "tierLabel": "High",
+      "domains": {
+        "d1": {
+          "raw": 13,
+          "capped": 13,
+          "max": 18
+        },
+        "d2": {
+          "raw": 6,
+          "capped": 6,
+          "max": 12
+        },
+        "d3": {
+          "raw": 15,
+          "capped": 15,
+          "max": 18
+        },
+        "d4": {
+          "raw": 7,
+          "capped": 7,
+          "max": 12
+        },
+        "d5": {
+          "raw": 15,
+          "capped": 15,
+          "max": 16
+        },
+        "d6": {
+          "raw": 12,
+          "capped": 12,
+          "max": 12
+        },
+        "d7": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d8": {
+          "raw": 7,
+          "capped": 7,
+          "max": 16
+        }
+      },
+      "dataVolumeFactor": 1.1285714285714286,
+      "phase": "steady",
+      "partB": null,
+      "partBNote": "no participant counts supplied - WU/FTE not computable"
+    },
+    {
+      "id": "GO8",
+      "pi": "Reiss",
+      "scored": true,
+      "partA": 61,
+      "partAMax": 116,
+      "tier": "High",
+      "tierLabel": "High",
+      "domains": {
+        "d1": {
+          "raw": 13,
+          "capped": 13,
+          "max": 18
+        },
+        "d2": {
+          "raw": 4,
+          "capped": 4,
+          "max": 12
+        },
+        "d3": {
+          "raw": 10,
+          "capped": 10,
+          "max": 18
+        },
+        "d4": {
+          "raw": 8,
+          "capped": 8,
+          "max": 12
+        },
+        "d5": {
+          "raw": 10,
+          "capped": 10,
+          "max": 16
+        },
+        "d6": {
+          "raw": 10,
+          "capped": 10,
+          "max": 12
+        },
+        "d7": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d8": {
+          "raw": 6,
+          "capped": 6,
+          "max": 16
+        }
+      },
+      "dataVolumeFactor": 1.0857142857142856,
+      "phase": "steady",
+      "partB": null,
+      "partBNote": "no participant counts supplied - WU/FTE not computable"
+    },
+    {
+      "id": "ICON3",
+      "pi": "Jesudas",
+      "scored": true,
+      "partA": 48,
+      "partAMax": 116,
+      "tier": "Moderate",
+      "tierLabel": "Moderate",
+      "domains": {
+        "d1": {
+          "raw": 11,
+          "capped": 11,
+          "max": 18
+        },
+        "d2": {
+          "raw": 6,
+          "capped": 6,
+          "max": 12
+        },
+        "d3": {
+          "raw": 6,
+          "capped": 6,
+          "max": 18
+        },
+        "d4": {
+          "raw": 6,
+          "capped": 6,
+          "max": 12
+        },
+        "d5": {
+          "raw": 7,
+          "capped": 7,
+          "max": 16
+        },
+        "d6": {
+          "raw": 6,
+          "capped": 6,
+          "max": 12
+        },
+        "d7": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d8": {
+          "raw": 6,
+          "capped": 6,
+          "max": 16
+        }
+      },
+      "dataVolumeFactor": 1.1285714285714286,
+      "phase": "steady",
+      "partB": null,
+      "partBNote": "no participant counts supplied - WU/FTE not computable"
+    },
+    {
+      "id": "RESESTX",
+      "pi": "Zheng",
+      "scored": true,
+      "partA": 56,
+      "partAMax": 116,
+      "tier": "Moderate",
+      "tierLabel": "Moderate",
+      "domains": {
+        "d1": {
+          "raw": 13,
+          "capped": 13,
+          "max": 18
+        },
+        "d2": {
+          "raw": 5,
+          "capped": 5,
+          "max": 12
+        },
+        "d3": {
+          "raw": 7,
+          "capped": 7,
+          "max": 18
+        },
+        "d4": {
+          "raw": 8,
+          "capped": 8,
+          "max": 12
+        },
+        "d5": {
+          "raw": 9,
+          "capped": 9,
+          "max": 16
+        },
+        "d6": {
+          "raw": 10,
+          "capped": 10,
+          "max": 12
+        },
+        "d7": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d8": {
+          "raw": 4,
+          "capped": 4,
+          "max": 16
+        }
+      },
+      "dataVolumeFactor": 1.1285714285714286,
+      "phase": "steady",
+      "partB": null,
+      "partBNote": "no participant counts supplied - WU/FTE not computable"
+    },
+    {
+      "id": "4WARDXP",
+      "pi": "Wlodarski",
+      "scored": true,
+      "partA": 64,
+      "partAMax": 116,
+      "tier": "High",
+      "tierLabel": "High",
+      "domains": {
+        "d1": {
+          "raw": 13,
+          "capped": 13,
+          "max": 18
+        },
+        "d2": {
+          "raw": 4,
+          "capped": 4,
+          "max": 12
+        },
+        "d3": {
+          "raw": 11,
+          "capped": 11,
+          "max": 18
+        },
+        "d4": {
+          "raw": 8,
+          "capped": 8,
+          "max": 12
+        },
+        "d5": {
+          "raw": 13,
+          "capped": 13,
+          "max": 16
+        },
+        "d6": {
+          "raw": 10,
+          "capped": 10,
+          "max": 12
+        },
+        "d7": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d8": {
+          "raw": 5,
+          "capped": 5,
+          "max": 16
+        }
+      },
+      "dataVolumeFactor": 1.1714285714285715,
+      "phase": "steady",
+      "partB": null,
+      "partBNote": "no participant counts supplied - WU/FTE not computable"
+    },
+    {
+      "id": "IXTEND3004",
+      "pi": "Jesudas",
+      "scored": true,
+      "partA": 70,
+      "partAMax": 116,
+      "tier": "High",
+      "tierLabel": "High",
+      "domains": {
+        "d1": {
+          "raw": 13,
+          "capped": 13,
+          "max": 18
+        },
+        "d2": {
+          "raw": 5,
+          "capped": 5,
+          "max": 12
+        },
+        "d3": {
+          "raw": 12,
+          "capped": 12,
+          "max": 18
+        },
+        "d4": {
+          "raw": 7,
+          "capped": 7,
+          "max": 12
+        },
+        "d5": {
+          "raw": 14,
+          "capped": 14,
+          "max": 16
+        },
+        "d6": {
+          "raw": 11,
+          "capped": 11,
+          "max": 12
+        },
+        "d7": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d8": {
+          "raw": 8,
+          "capped": 8,
+          "max": 16
+        }
+      },
+      "dataVolumeFactor": 1.2142857142857142,
+      "phase": "steady",
+      "partB": null,
+      "partBNote": "no participant counts supplied - WU/FTE not computable"
+    },
+    {
+      "id": "LEAP",
+      "pi": "Jesudas",
+      "scored": true,
+      "partA": 36,
+      "partAMax": 116,
+      "tier": "Low",
+      "tierLabel": "Low",
+      "domains": {
+        "d1": {
+          "raw": 11,
+          "capped": 11,
+          "max": 18
+        },
+        "d2": {
+          "raw": 2,
+          "capped": 2,
+          "max": 12
+        },
+        "d3": {
+          "raw": 4,
+          "capped": 4,
+          "max": 18
+        },
+        "d4": {
+          "raw": 3,
+          "capped": 3,
+          "max": 12
+        },
+        "d5": {
+          "raw": 5,
+          "capped": 5,
+          "max": 16
+        },
+        "d6": {
+          "raw": 6,
+          "capped": 6,
+          "max": 12
+        },
+        "d7": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d8": {
+          "raw": 5,
+          "capped": 5,
+          "max": 16
+        }
+      },
+      "dataVolumeFactor": 1.0857142857142856,
+      "phase": "steady",
+      "partB": null,
+      "partBNote": "no participant counts supplied - WU/FTE not computable"
+    },
+    {
+      "id": "PNHIPTA",
+      "pi": "Wlodarski",
+      "scored": true,
+      "partA": 65,
+      "partAMax": 116,
+      "tier": "High",
+      "tierLabel": "High",
+      "domains": {
+        "d1": {
+          "raw": 13,
+          "capped": 13,
+          "max": 18
+        },
+        "d2": {
+          "raw": 5,
+          "capped": 5,
+          "max": 12
+        },
+        "d3": {
+          "raw": 12,
+          "capped": 12,
+          "max": 18
+        },
+        "d4": {
+          "raw": 6,
+          "capped": 6,
+          "max": 12
+        },
+        "d5": {
+          "raw": 14,
+          "capped": 14,
+          "max": 16
+        },
+        "d6": {
+          "raw": 10,
+          "capped": 10,
+          "max": 12
+        },
+        "d7": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d8": {
+          "raw": 5,
+          "capped": 5,
+          "max": 16
+        }
+      },
+      "dataVolumeFactor": 1.1285714285714286,
+      "phase": "steady",
+      "partB": null,
+      "partBNote": "no participant counts supplied - WU/FTE not computable"
+    },
+    {
+      "id": "SCDSTEMM",
+      "pi": "Sharma (protocol) / Leonard (workbooks)",
+      "scored": true,
+      "partA": 48,
+      "partAMax": 116,
+      "tier": "Moderate",
+      "tierLabel": "Moderate",
+      "domains": {
+        "d1": {
+          "raw": 6,
+          "capped": 6,
+          "max": 18
+        },
+        "d2": {
+          "raw": 5,
+          "capped": 5,
+          "max": 12
+        },
+        "d3": {
+          "raw": 13,
+          "capped": 13,
+          "max": 18
+        },
+        "d4": {
+          "raw": 9,
+          "capped": 9,
+          "max": 12
+        },
+        "d5": {
+          "raw": 6,
+          "capped": 6,
+          "max": 16
+        },
+        "d6": {
+          "raw": 6,
+          "capped": 6,
+          "max": 12
+        },
+        "d7": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d8": {
+          "raw": 3,
+          "capped": 3,
+          "max": 16
+        }
+      },
+      "dataVolumeFactor": 1.042857142857143,
+      "phase": "steady",
+      "partB": null,
+      "partBNote": "no participant counts supplied - WU/FTE not computable"
+    },
+    {
+      "id": "TRANSIT3",
+      "pi": "",
+      "scored": true,
+      "partA": 78,
+      "partAMax": 116,
+      "tier": "Very high",
+      "tierLabel": "Very high",
+      "domains": {
+        "d1": {
+          "raw": 12,
+          "capped": 12,
+          "max": 18
+        },
+        "d2": {
+          "raw": 6,
+          "capped": 6,
+          "max": 12
+        },
+        "d3": {
+          "raw": 13,
+          "capped": 13,
+          "max": 18
+        },
+        "d4": {
+          "raw": 10,
+          "capped": 10,
+          "max": 12
+        },
+        "d5": {
+          "raw": 14,
+          "capped": 14,
+          "max": 16
+        },
+        "d6": {
+          "raw": 12,
+          "capped": 12,
+          "max": 12
+        },
+        "d7": {
+          "raw": 2,
+          "capped": 2,
+          "max": 12
+        },
+        "d8": {
+          "raw": 9,
+          "capped": 9,
+          "max": 16
+        }
+      },
+      "dataVolumeFactor": 1.1285714285714286,
+      "phase": "steady",
+      "partB": null,
+      "partBNote": "no participant counts supplied - WU/FTE not computable"
+    },
+    {
+      "id": "CASPLTFU",
+      "pi": "",
+      "scored": true,
+      "partA": 57,
+      "partAMax": 116,
+      "tier": "Moderate",
+      "tierLabel": "Moderate",
+      "domains": {
+        "d1": {
+          "raw": 13,
+          "capped": 13,
+          "max": 18
+        },
+        "d2": {
+          "raw": 5,
+          "capped": 5,
+          "max": 12
+        },
+        "d3": {
+          "raw": 8,
+          "capped": 8,
+          "max": 18
+        },
+        "d4": {
+          "raw": 1,
+          "capped": 1,
+          "max": 12
+        },
+        "d5": {
+          "raw": 12,
+          "capped": 12,
+          "max": 16
+        },
+        "d6": {
+          "raw": 10,
+          "capped": 10,
+          "max": 12
+        },
+        "d7": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d8": {
+          "raw": 8,
+          "capped": 8,
+          "max": 16
+        }
+      },
+      "dataVolumeFactor": 1.1285714285714286,
+      "phase": "steady",
+      "partB": null,
+      "partBNote": "no participant counts supplied - WU/FTE not computable"
+    },
+    {
+      "id": "BGLOBAL",
+      "pi": "",
+      "scored": true,
+      "partA": 56,
+      "partAMax": 116,
+      "tier": "Moderate",
+      "tierLabel": "Moderate",
+      "domains": {
+        "d1": {
+          "raw": 8,
+          "capped": 8,
+          "max": 18
+        },
+        "d2": {
+          "raw": 3,
+          "capped": 3,
+          "max": 12
+        },
+        "d3": {
+          "raw": 11,
+          "capped": 11,
+          "max": 18
+        },
+        "d4": {
+          "raw": 8,
+          "capped": 8,
+          "max": 12
+        },
+        "d5": {
+          "raw": 11,
+          "capped": 11,
+          "max": 16
+        },
+        "d6": {
+          "raw": 10,
+          "capped": 10,
+          "max": 12
+        },
+        "d7": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d8": {
+          "raw": 5,
+          "capped": 5,
+          "max": 16
+        }
+      },
+      "dataVolumeFactor": 1.0857142857142856,
+      "phase": "steady",
+      "partB": null,
+      "partBNote": "no participant counts supplied - WU/FTE not computable"
+    },
+    {
+      "id": "AGT4HB",
+      "pi": "",
+      "scored": true,
+      "partA": 55,
+      "partAMax": 116,
+      "tier": "Moderate",
+      "tierLabel": "Moderate",
+      "domains": {
+        "d1": {
+          "raw": 8,
+          "capped": 8,
+          "max": 18
+        },
+        "d2": {
+          "raw": 4,
+          "capped": 4,
+          "max": 12
+        },
+        "d3": {
+          "raw": 11,
+          "capped": 11,
+          "max": 18
+        },
+        "d4": {
+          "raw": 8,
+          "capped": 8,
+          "max": 12
+        },
+        "d5": {
+          "raw": 9,
+          "capped": 9,
+          "max": 16
+        },
+        "d6": {
+          "raw": 10,
+          "capped": 10,
+          "max": 12
+        },
+        "d7": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d8": {
+          "raw": 5,
+          "capped": 5,
+          "max": 16
+        }
+      },
+      "dataVolumeFactor": 1.0857142857142856,
+      "phase": "steady",
+      "partB": null,
+      "partBNote": "no participant counts supplied - WU/FTE not computable"
+    },
+    {
+      "id": "ATHNTRANSCENDS",
+      "pi": "",
+      "scored": true,
+      "partA": 48,
+      "partAMax": 116,
+      "tier": "Moderate",
+      "tierLabel": "Moderate",
+      "domains": {
+        "d1": {
+          "raw": 8,
+          "capped": 8,
+          "max": 18
+        },
+        "d2": {
+          "raw": 5,
+          "capped": 5,
+          "max": 12
+        },
+        "d3": {
+          "raw": 5,
+          "capped": 5,
+          "max": 18
+        },
+        "d4": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d5": {
+          "raw": 12,
+          "capped": 12,
+          "max": 16
+        },
+        "d6": {
+          "raw": 6,
+          "capped": 6,
+          "max": 12
+        },
+        "d7": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d8": {
+          "raw": 12,
+          "capped": 12,
+          "max": 16
+        }
+      },
+      "dataVolumeFactor": 1.1714285714285715,
+      "phase": "steady",
+      "partB": null,
+      "partBNote": "no participant counts supplied - WU/FTE not computable"
+    },
+    {
+      "id": "BDSTEM",
+      "pi": "",
+      "scored": true,
+      "partA": 44,
+      "partAMax": 116,
+      "tier": "Moderate",
+      "tierLabel": "Moderate",
+      "domains": {
+        "d1": {
+          "raw": 6,
+          "capped": 6,
+          "max": 18
+        },
+        "d2": {
+          "raw": 4,
+          "capped": 4,
+          "max": 12
+        },
+        "d3": {
+          "raw": 12,
+          "capped": 12,
+          "max": 18
+        },
+        "d4": {
+          "raw": 8,
+          "capped": 8,
+          "max": 12
+        },
+        "d5": {
+          "raw": 6,
+          "capped": 6,
+          "max": 16
+        },
+        "d6": {
+          "raw": 6,
+          "capped": 6,
+          "max": 12
+        },
+        "d7": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d8": {
+          "raw": 2,
+          "capped": 2,
+          "max": 16
+        }
+      },
+      "dataVolumeFactor": 1.042857142857143,
+      "phase": "steady",
+      "partB": null,
+      "partBNote": "no participant counts supplied - WU/FTE not computable"
+    },
+    {
+      "id": "MICROSCPI",
+      "pi": "",
+      "scored": true,
+      "partA": 39,
+      "partAMax": 116,
+      "tier": "Moderate",
+      "tierLabel": "Moderate",
+      "domains": {
+        "d1": {
+          "raw": 7,
+          "capped": 7,
+          "max": 18
+        },
+        "d2": {
+          "raw": 4,
+          "capped": 4,
+          "max": 12
+        },
+        "d3": {
+          "raw": 5,
+          "capped": 5,
+          "max": 18
+        },
+        "d4": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d5": {
+          "raw": 12,
+          "capped": 12,
+          "max": 16
+        },
+        "d6": {
+          "raw": 3,
+          "capped": 3,
+          "max": 12
+        },
+        "d7": {
+          "raw": 2,
+          "capped": 2,
+          "max": 12
+        },
+        "d8": {
+          "raw": 6,
+          "capped": 6,
+          "max": 16
+        }
+      },
+      "dataVolumeFactor": 1.1714285714285715,
+      "phase": "steady",
+      "partB": null,
+      "partBNote": "no participant counts supplied - WU/FTE not computable"
+    },
+    {
+      "id": "HEMLTFU",
+      "pi": "",
+      "scored": true,
+      "partA": 38,
+      "partAMax": 116,
+      "tier": "Low",
+      "tierLabel": "Low",
+      "domains": {
+        "d1": {
+          "raw": 7,
+          "capped": 7,
+          "max": 18
+        },
+        "d2": {
+          "raw": 4,
+          "capped": 4,
+          "max": 12
+        },
+        "d3": {
+          "raw": 5,
+          "capped": 5,
+          "max": 18
+        },
+        "d4": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d5": {
+          "raw": 8,
+          "capped": 8,
+          "max": 16
+        },
+        "d6": {
+          "raw": 7,
+          "capped": 7,
+          "max": 12
+        },
+        "d7": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d8": {
+          "raw": 7,
+          "capped": 7,
+          "max": 16
+        }
+      },
+      "dataVolumeFactor": 1.1285714285714286,
+      "phase": "steady",
+      "partB": null,
+      "partBNote": "no participant counts supplied - WU/FTE not computable"
+    },
+    {
+      "id": "PYKIDR",
+      "pi": "",
+      "scored": true,
+      "partA": 38,
+      "partAMax": 116,
+      "tier": "Low",
+      "tierLabel": "Low",
+      "domains": {
+        "d1": {
+          "raw": 9,
+          "capped": 9,
+          "max": 18
+        },
+        "d2": {
+          "raw": 4,
+          "capped": 4,
+          "max": 12
+        },
+        "d3": {
+          "raw": 1,
+          "capped": 1,
+          "max": 18
+        },
+        "d4": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d5": {
+          "raw": 8,
+          "capped": 8,
+          "max": 16
+        },
+        "d6": {
+          "raw": 5,
+          "capped": 5,
+          "max": 12
+        },
+        "d7": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d8": {
+          "raw": 11,
+          "capped": 11,
+          "max": 16
+        }
+      },
+      "dataVolumeFactor": 1.1714285714285715,
+      "phase": "steady",
+      "partB": null,
+      "partBNote": "no participant counts supplied - WU/FTE not computable"
+    },
+    {
+      "id": "RENSCD",
+      "pi": "",
+      "scored": true,
+      "partA": 37,
+      "partAMax": 116,
+      "tier": "Low",
+      "tierLabel": "Low",
+      "domains": {
+        "d1": {
+          "raw": 8,
+          "capped": 8,
+          "max": 18
+        },
+        "d2": {
+          "raw": 4,
+          "capped": 4,
+          "max": 12
+        },
+        "d3": {
+          "raw": 7,
+          "capped": 7,
+          "max": 18
+        },
+        "d4": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d5": {
+          "raw": 11,
+          "capped": 11,
+          "max": 16
+        },
+        "d6": {
+          "raw": 3,
+          "capped": 3,
+          "max": 12
+        },
+        "d7": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d8": {
+          "raw": 4,
+          "capped": 4,
+          "max": 16
+        }
+      },
+      "dataVolumeFactor": 1.0857142857142856,
+      "phase": "steady",
+      "partB": null,
+      "partBNote": "no participant counts supplied - WU/FTE not computable"
+    },
+    {
+      "id": "LIVBX",
+      "pi": "",
+      "scored": true,
+      "partA": 34,
+      "partAMax": 116,
+      "tier": "Low",
+      "tierLabel": "Low",
+      "domains": {
+        "d1": {
+          "raw": 6,
+          "capped": 6,
+          "max": 18
+        },
+        "d2": {
+          "raw": 2,
+          "capped": 2,
+          "max": 12
+        },
+        "d3": {
+          "raw": 9,
+          "capped": 9,
+          "max": 18
+        },
+        "d4": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d5": {
+          "raw": 9,
+          "capped": 9,
+          "max": 16
+        },
+        "d6": {
+          "raw": 5,
+          "capped": 5,
+          "max": 12
+        },
+        "d7": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d8": {
+          "raw": 3,
+          "capped": 3,
+          "max": 16
+        }
+      },
+      "dataVolumeFactor": 1.0857142857142856,
+      "phase": "steady",
+      "partB": null,
+      "partBNote": "no participant counts supplied - WU/FTE not computable"
+    },
+    {
+      "id": "ATHN10",
+      "pi": "",
+      "scored": true,
+      "partA": 32,
+      "partAMax": 116,
+      "tier": "Low",
+      "tierLabel": "Low",
+      "domains": {
+        "d1": {
+          "raw": 7,
+          "capped": 7,
+          "max": 18
+        },
+        "d2": {
+          "raw": 4,
+          "capped": 4,
+          "max": 12
+        },
+        "d3": {
+          "raw": 1,
+          "capped": 1,
+          "max": 18
+        },
+        "d4": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d5": {
+          "raw": 7,
+          "capped": 7,
+          "max": 16
+        },
+        "d6": {
+          "raw": 4,
+          "capped": 4,
+          "max": 12
+        },
+        "d7": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d8": {
+          "raw": 9,
+          "capped": 9,
+          "max": 16
+        }
+      },
+      "dataVolumeFactor": 1.1285714285714286,
+      "phase": "steady",
+      "partB": null,
+      "partBNote": "no participant counts supplied - WU/FTE not computable"
+    },
+    {
+      "id": "ATHN",
+      "pi": "",
+      "scored": true,
+      "partA": 31,
+      "partAMax": 116,
+      "tier": "Low",
+      "tierLabel": "Low",
+      "domains": {
+        "d1": {
+          "raw": 7,
+          "capped": 7,
+          "max": 18
+        },
+        "d2": {
+          "raw": 4,
+          "capped": 4,
+          "max": 12
+        },
+        "d3": {
+          "raw": 1,
+          "capped": 1,
+          "max": 18
+        },
+        "d4": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d5": {
+          "raw": 6,
+          "capped": 6,
+          "max": 16
+        },
+        "d6": {
+          "raw": 4,
+          "capped": 4,
+          "max": 12
+        },
+        "d7": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d8": {
+          "raw": 9,
+          "capped": 9,
+          "max": 16
+        }
+      },
+      "dataVolumeFactor": 1.1285714285714286,
+      "phase": "steady",
+      "partB": null,
+      "partBNote": "no participant counts supplied - WU/FTE not computable"
+    },
+    {
+      "id": "NAPAACMDS",
+      "pi": "",
+      "scored": true,
+      "partA": 27,
+      "partAMax": 116,
+      "tier": "Low",
+      "tierLabel": "Low",
+      "domains": {
+        "d1": {
+          "raw": 7,
+          "capped": 7,
+          "max": 18
+        },
+        "d2": {
+          "raw": 3,
+          "capped": 3,
+          "max": 12
+        },
+        "d3": {
+          "raw": 1,
+          "capped": 1,
+          "max": 18
+        },
+        "d4": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d5": {
+          "raw": 5,
+          "capped": 5,
+          "max": 16
+        },
+        "d6": {
+          "raw": 2,
+          "capped": 2,
+          "max": 12
+        },
+        "d7": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d8": {
+          "raw": 9,
+          "capped": 9,
+          "max": 16
+        }
+      },
+      "dataVolumeFactor": 1.1285714285714286,
+      "phase": "steady",
+      "partB": null,
+      "partBNote": "no participant counts supplied - WU/FTE not computable"
+    },
+    {
+      "id": "INSIGHT-HD",
+      "pi": "",
+      "scored": true,
+      "partA": 27,
+      "partAMax": 116,
+      "tier": "Low",
+      "tierLabel": "Low",
+      "domains": {
+        "d1": {
+          "raw": 1,
+          "capped": 1,
+          "max": 18
+        },
+        "d2": {
+          "raw": 4,
+          "capped": 4,
+          "max": 12
+        },
+        "d3": {
+          "raw": 2,
+          "capped": 2,
+          "max": 18
+        },
+        "d4": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d5": {
+          "raw": 11,
+          "capped": 11,
+          "max": 16
+        },
+        "d6": {
+          "raw": 3,
+          "capped": 3,
+          "max": 12
+        },
+        "d7": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d8": {
+          "raw": 6,
+          "capped": 6,
+          "max": 16
+        }
+      },
+      "dataVolumeFactor": 1.0857142857142856,
+      "phase": "steady",
+      "partB": null,
+      "partBNote": "no participant counts supplied - WU/FTE not computable"
+    },
+    {
+      "id": "1000SGP",
+      "pi": "",
+      "scored": true,
+      "partA": 24,
+      "partAMax": 116,
+      "tier": "Low",
+      "tierLabel": "Low",
+      "domains": {
+        "d1": {
+          "raw": 1,
+          "capped": 1,
+          "max": 18
+        },
+        "d2": {
+          "raw": 3,
+          "capped": 3,
+          "max": 12
+        },
+        "d3": {
+          "raw": 2,
+          "capped": 2,
+          "max": 18
+        },
+        "d4": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d5": {
+          "raw": 11,
+          "capped": 11,
+          "max": 16
+        },
+        "d6": {
+          "raw": 1,
+          "capped": 1,
+          "max": 12
+        },
+        "d7": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d8": {
+          "raw": 6,
+          "capped": 6,
+          "max": 16
+        }
+      },
+      "dataVolumeFactor": 1.0857142857142856,
+      "phase": "steady",
+      "partB": null,
+      "partBNote": "no participant counts supplied - WU/FTE not computable"
+    },
+    {
+      "id": "NYBCSCD",
+      "pi": "",
+      "scored": true,
+      "partA": 23,
+      "partAMax": 116,
+      "tier": "Low",
+      "tierLabel": "Low",
+      "domains": {
+        "d1": {
+          "raw": 7,
+          "capped": 7,
+          "max": 18
+        },
+        "d2": {
+          "raw": 4,
+          "capped": 4,
+          "max": 12
+        },
+        "d3": {
+          "raw": 2,
+          "capped": 2,
+          "max": 18
+        },
+        "d4": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d5": {
+          "raw": 6,
+          "capped": 6,
+          "max": 16
+        },
+        "d6": {
+          "raw": 1,
+          "capped": 1,
+          "max": 12
+        },
+        "d7": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d8": {
+          "raw": 3,
+          "capped": 3,
+          "max": 16
+        }
+      },
+      "dataVolumeFactor": 1.042857142857143,
+      "phase": "steady",
+      "partB": null,
+      "partBNote": "no participant counts supplied - WU/FTE not computable"
+    },
+    {
+      "id": "BINFORMED",
+      "pi": "",
+      "scored": true,
+      "partA": 22,
+      "partAMax": 116,
+      "tier": "Low",
+      "tierLabel": "Low",
+      "domains": {
+        "d1": {
+          "raw": 1,
+          "capped": 1,
+          "max": 18
+        },
+        "d2": {
+          "raw": 5,
+          "capped": 5,
+          "max": 12
+        },
+        "d3": {
+          "raw": 2,
+          "capped": 2,
+          "max": 18
+        },
+        "d4": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d5": {
+          "raw": 5,
+          "capped": 5,
+          "max": 16
+        },
+        "d6": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d7": {
+          "raw": 8,
+          "capped": 8,
+          "max": 12
+        },
+        "d8": {
+          "raw": 1,
+          "capped": 1,
+          "max": 16
+        }
+      },
+      "dataVolumeFactor": 1.042857142857143,
+      "phase": "steady",
+      "partB": null,
+      "partBNote": "no participant counts supplied - WU/FTE not computable"
+    },
+    {
+      "id": "HEMOCOG",
+      "pi": "",
+      "scored": true,
+      "partA": 21,
+      "partAMax": 116,
+      "tier": "Low",
+      "tierLabel": "Low",
+      "domains": {
+        "d1": {
+          "raw": 1,
+          "capped": 1,
+          "max": 18
+        },
+        "d2": {
+          "raw": 5,
+          "capped": 5,
+          "max": 12
+        },
+        "d3": {
+          "raw": 3,
+          "capped": 3,
+          "max": 18
+        },
+        "d4": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d5": {
+          "raw": 6,
+          "capped": 6,
+          "max": 16
+        },
+        "d6": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d7": {
+          "raw": 5,
+          "capped": 5,
+          "max": 12
+        },
+        "d8": {
+          "raw": 1,
+          "capped": 1,
+          "max": 16
+        }
+      },
+      "dataVolumeFactor": 1.042857142857143,
+      "phase": "steady",
+      "partB": null,
+      "partBNote": "no participant counts supplied - WU/FTE not computable"
+    },
+    {
+      "id": "BMFD",
+      "pi": "",
+      "scored": true,
+      "partA": 18,
+      "partAMax": 116,
+      "tier": "Minimal",
+      "tierLabel": "Minimal",
+      "domains": {
+        "d1": {
+          "raw": 1,
+          "capped": 1,
+          "max": 18
+        },
+        "d2": {
+          "raw": 3,
+          "capped": 3,
+          "max": 12
+        },
+        "d3": {
+          "raw": 1,
+          "capped": 1,
+          "max": 18
+        },
+        "d4": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d5": {
+          "raw": 4,
+          "capped": 4,
+          "max": 16
+        },
+        "d6": {
+          "raw": 2,
+          "capped": 2,
+          "max": 12
+        },
+        "d7": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d8": {
+          "raw": 7,
+          "capped": 7,
+          "max": 16
+        }
+      },
+      "dataVolumeFactor": 1.1285714285714286,
+      "phase": "steady",
+      "partB": null,
+      "partBNote": "no participant counts supplied - WU/FTE not computable"
+    },
+    {
+      "id": "WARPG",
+      "pi": "",
+      "scored": true,
+      "partA": 17,
+      "partAMax": 116,
+      "tier": "Minimal",
+      "tierLabel": "Minimal",
+      "domains": {
+        "d1": {
+          "raw": 1,
+          "capped": 1,
+          "max": 18
+        },
+        "d2": {
+          "raw": 2,
+          "capped": 2,
+          "max": 12
+        },
+        "d3": {
+          "raw": 2,
+          "capped": 2,
+          "max": 18
+        },
+        "d4": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d5": {
+          "raw": 6,
+          "capped": 6,
+          "max": 16
+        },
+        "d6": {
+          "raw": 2,
+          "capped": 2,
+          "max": 12
+        },
+        "d7": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d8": {
+          "raw": 4,
+          "capped": 4,
+          "max": 16
+        }
+      },
+      "dataVolumeFactor": 1.0857142857142856,
+      "phase": "steady",
+      "partB": null,
+      "partBNote": "no participant counts supplied - WU/FTE not computable"
+    },
+    {
+      "id": "BMHR",
+      "pi": "",
+      "scored": true,
+      "partA": 11,
+      "partAMax": 116,
+      "tier": "Minimal",
+      "tierLabel": "Minimal",
+      "domains": {
+        "d1": {
+          "raw": 1,
+          "capped": 1,
+          "max": 18
+        },
+        "d2": {
+          "raw": 2,
+          "capped": 2,
+          "max": 12
+        },
+        "d3": {
+          "raw": 1,
+          "capped": 1,
+          "max": 18
+        },
+        "d4": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d5": {
+          "raw": 4,
+          "capped": 4,
+          "max": 16
+        },
+        "d6": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d7": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d8": {
+          "raw": 3,
+          "capped": 3,
+          "max": 16
+        }
+      },
+      "dataVolumeFactor": 1.042857142857143,
+      "phase": "steady",
+      "partB": null,
+      "partBNote": "no participant counts supplied - WU/FTE not computable"
+    },
+    {
+      "id": "COAGALL",
+      "pi": "",
+      "scored": true,
+      "partA": 7,
+      "partAMax": 116,
+      "tier": "Minimal",
+      "tierLabel": "Minimal",
+      "domains": {
+        "d1": {
+          "raw": 1,
+          "capped": 1,
+          "max": 18
+        },
+        "d2": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d3": {
+          "raw": 0,
+          "capped": 0,
+          "max": 18
+        },
+        "d4": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d5": {
+          "raw": 3,
+          "capped": 3,
+          "max": 16
+        },
+        "d6": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d7": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d8": {
+          "raw": 3,
+          "capped": 3,
+          "max": 16
+        }
+      },
+      "dataVolumeFactor": 1.1285714285714286,
+      "phase": "steady",
+      "partB": null,
+      "partBNote": "no participant counts supplied - WU/FTE not computable"
+    },
+    {
+      "id": "ROCHELLE",
+      "pi": "",
+      "scored": true,
+      "partA": 8,
+      "partAMax": 116,
+      "tier": "Minimal",
+      "tierLabel": "Minimal",
+      "domains": {
+        "d1": {
+          "raw": 1,
+          "capped": 1,
+          "max": 18
+        },
+        "d2": {
+          "raw": 1,
+          "capped": 1,
+          "max": 12
+        },
+        "d3": {
+          "raw": 0,
+          "capped": 0,
+          "max": 18
+        },
+        "d4": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d5": {
+          "raw": 3,
+          "capped": 3,
+          "max": 16
+        },
+        "d6": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d7": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d8": {
+          "raw": 3,
+          "capped": 3,
+          "max": 16
+        }
+      },
+      "dataVolumeFactor": 1.1285714285714286,
+      "phase": "steady",
+      "partB": null,
+      "partBNote": "no participant counts supplied - WU/FTE not computable"
+    },
+    {
+      "id": "RUHPIS",
+      "pi": "",
+      "scored": true,
+      "partA": 7,
+      "partAMax": 116,
+      "tier": "Minimal",
+      "tierLabel": "Minimal",
+      "domains": {
+        "d1": {
+          "raw": 1,
+          "capped": 1,
+          "max": 18
+        },
+        "d2": {
+          "raw": 1,
+          "capped": 1,
+          "max": 12
+        },
+        "d3": {
+          "raw": 0,
+          "capped": 0,
+          "max": 18
+        },
+        "d4": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d5": {
+          "raw": 3,
+          "capped": 3,
+          "max": 16
+        },
+        "d6": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d7": {
+          "raw": 0,
+          "capped": 0,
+          "max": 12
+        },
+        "d8": {
+          "raw": 2,
+          "capped": 2,
+          "max": 16
+        }
+      },
+      "dataVolumeFactor": 1.0857142857142856,
+      "phase": "steady",
+      "partB": null,
+      "partBNote": "no participant counts supplied - WU/FTE not computable"
+    }
+  ],
+  "existingHumanScores": [
+    {
+      "protocol": "SAGES1",
+      "partA": 79
+    },
+    {
+      "protocol": "HIBISCUS2",
+      "partA": 61
+    },
+    {
+      "protocol": "RHEMEDY",
+      "partA": 59
+    },
+    {
+      "protocol": "SCCRIP",
+      "partA": 59
+    },
+    {
+      "protocol": "CITUSCD",
+      "partA": 58
+    },
+    {
+      "protocol": "SPARKLE",
+      "partA": 58
+    },
+    {
+      "protocol": "MYPERS",
+      "partA": 46
+    },
+    {
+      "protocol": "SCDICII",
+      "partA": 45
+    },
+    {
+      "protocol": "REALANSWRS",
+      "partA": 40
+    },
+    {
+      "protocol": "GRNDAD",
+      "partA": 24
+    },
+    {
+      "protocol": "WeDecide",
+      "partA": 22
+    },
+    {
+      "protocol": "MIPICS",
+      "partA": 20
+    },
+    {
+      "protocol": "ASHRDC",
+      "partA": 12
+    }
+  ],
+  "unscored": [
+    "ACSWORKGRP",
+    "BCHITP",
+    "BEN",
+    "BMRNGENE8",
+    "BSCREEN",
+    "COVERSNGA",
+    "DBA19",
+    "FATHERS",
+    "IGNITE",
+    "INSIGHTBONE",
+    "IPHUCP",
+    "LTFU4HB",
+    "MMLOFDS",
+    "N3C",
+    "NEUROSCD",
+    "NOTCHES-E",
+    "SCDAge",
+    "SCDSTEMPG",
+    "STABLEF7",
+    "TOPMED",
+    "VINGT",
+    "VUMCSICKLECELLDISEASEALGORITHMS",
+    "XPD05-046-PNHREG",
+    "XPD12-050SICHA",
+    "XPD14-164",
+    "XPD18-015"
+  ]
+}
