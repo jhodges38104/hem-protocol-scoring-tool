@@ -32,7 +32,7 @@ Score each item once. Anchors are given for the low and high end of each item's 
 
 | Item | 0 | Mid | Max | Pts |
 |---|---|---|---|---|
-| Regulatory status | Not FDA-regulated | IND/IDE exempt determination required | Active IND/IDE held by St. Jude | 0–5 |
+| Regulatory status | Not FDA-regulated | IND/IDE exempt determination required | Active IND held by St. Jude | 0–5 |
 | Sponsor type | Investigator-initiated, internal | NIH/federal | Industry, or federal with external coordinating center | 0–3 |
 | Site role | Single-site | Participating site, multi-site | Coordinating center for multi-site | 0–5 |
 | Oversight bodies | IRB only | + DSMB or independent monitor | + external audit/inspection readiness obligations | 0–3 |
